@@ -20,7 +20,8 @@ export const getFriends = query({
 
     const friendsWithDetails = await Promise.all(
       friends.map(async (friend) => {
-        const friendId = friend.userId === userId ? friend.friendId : friend.userId;
+        const isSender = friend.userId === userId;
+        const friendId = isSender ? friend.friendId : friend.userId;
         const friendUser = await ctx.db
           .query("users")
           .filter((q) => q.eq(q.field("userId"), friendId))
@@ -29,7 +30,8 @@ export const getFriends = query({
           ...friend, 
           friendId,
           friendName: friendUser?.name || "Unknown",
-          friendEmail: friend.status === "accepted" ? friendUser?.email : null
+          friendEmail: friend.status === "accepted" ? friendUser?.email : null,
+          isSender
         };
       })
     );
@@ -95,7 +97,7 @@ export const acceptFriendRequest = mutation({
     const userId = await getUserId(ctx);
     if (!userId) throw new Error("User not found");
 
-    await ctx.db
+    const friendRequest = await ctx.db
       .query("friends")
       .filter((q) => 
         q.and(
@@ -103,7 +105,11 @@ export const acceptFriendRequest = mutation({
           q.eq(q.field("friendId"), userId)
         )
       )
-      .patch({ status: "accepted" });
+      .first();
+
+    if (!friendRequest) throw new Error("Friend request not found");
+
+    await ctx.db.patch(friendRequest._id, { status: "accepted" });
   },
 });
 
@@ -143,5 +149,23 @@ export const createOrUpdateUser = mutation({
 
     const newUserId = await ctx.db.insert("users", { userId, name, email });
     return newUserId;
+  },
+});
+
+export const rejectFriendRequest = mutation({
+  args: { friendId: v.string() },
+  handler: async (ctx, { friendId }) => {
+    const userId = await getUserId(ctx);
+    if (!userId) throw new Error("User not found");
+
+    await ctx.db
+      .query("friends")
+      .filter((q) => 
+        q.and(
+          q.eq(q.field("userId"), friendId),
+          q.eq(q.field("friendId"), userId)
+        )
+      )
+      .delete();
   },
 });

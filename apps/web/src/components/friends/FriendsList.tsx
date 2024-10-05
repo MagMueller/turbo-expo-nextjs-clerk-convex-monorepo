@@ -10,12 +10,29 @@ const FriendsList = () => {
   const searchUsers = useQuery(api.friends.searchUsers, { query: searchQuery });
   const addFriend = useMutation(api.friends.addFriend);
   const acceptFriendRequest = useMutation(api.friends.acceptFriendRequest);
+  const rejectFriendRequest = useMutation(api.friends.rejectFriendRequest);
   
   const handleAddFriend = async (friendId: string) => {
     try {
       await addFriend({ friendId });
     } catch (error) {
       console.error("Error adding friend:", error);
+    }
+  };
+
+  const handleAcceptRequest = async (friendId: string) => {
+    try {
+      await acceptFriendRequest({ friendId });
+    } catch (error) {
+      console.error("Error accepting friend request:", error);
+    }
+  };
+
+  const handleRejectRequest = async (friendId: string) => {
+    try {
+      await rejectFriendRequest({ friendId });
+    } catch (error) {
+      console.error("Error rejecting friend request:", error);
     }
   };
 
@@ -43,18 +60,24 @@ const FriendsList = () => {
               <span>{friend.friendName}</span>
             </Link>
             {friend.status === "accepted" && <span>{friend.friendEmail}</span>}
-            {friend.status === "pending" && (
-              <>
-                <span className="text-yellow-500">Pending</span>
-                {friend.friendId !== friend.userId && (
-                  <button
-                    onClick={() => acceptFriendRequest({ friendId: friend.friendId })}
-                    className="p-2 bg-green-500 text-white rounded"
-                  >
-                    Accept Request
-                  </button>
-                )}
-              </>
+            {friend.status === "pending" && friend.isSender && (
+              <span className="text-yellow-500">Pending</span>
+            )}
+            {friend.status === "pending" && !friend.isSender && (
+              <div>
+                <button
+                  onClick={() => handleAcceptRequest(friend.friendId)}
+                  className="p-2 bg-green-500 text-white rounded mr-2"
+                >
+                  Accept
+                </button>
+                <button
+                  onClick={() => handleRejectRequest(friend.friendId)}
+                  className="p-2 bg-red-500 text-white rounded"
+                >
+                  Reject
+                </button>
+              </div>
             )}
           </div>
         ))}

@@ -1,5 +1,5 @@
 import Link from "next/link";
-import DeleteGoal from "./DeleteGoa5l";
+import DeleteGoal from "./DeleteGoal";
 
 export interface GoalProps {
   goal: {

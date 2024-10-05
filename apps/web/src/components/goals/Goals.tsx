@@ -10,6 +10,7 @@ const Goals: React.FC = () => {
   const [search, setSearch] = useState("");
   const [newGoalTitle, setNewGoalTitle] = useState("");
   const [newGoalDeadline, setNewGoalDeadline] = useState("");
+  const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);
 
   const allGoals = useQuery(api.goals.getGoals);
   const deleteGoal = useMutation(api.goals.deleteGoal);
@@ -53,10 +54,23 @@ const Goals: React.FC = () => {
             onKeyPress={(e) => e.key === 'Enter' && handleCreateGoal()}
             className="flex-1 text-[#2D2D2D] text-[17px] sm:text-2xl not-italic font-light leading-[114.3%] tracking-[-0.6px] focus:outline-0 focus:ring-0 focus:border-0 border-0"
           />
-          <DatePicker
-            value={newGoalDeadline}
-            onChange={setNewGoalDeadline}
-          />
+          <button
+            onClick={() => setIsDatePickerOpen(!isDatePickerOpen)}
+            className="text-blue-500 hover:text-blue-700"
+          >
+            {newGoalDeadline ? new Date(newGoalDeadline).toLocaleDateString() : "Set Deadline"}
+          </button>
+          {isDatePickerOpen && (
+            <div className="absolute z-10 right-0 mt-2">
+              <DatePicker
+                value={newGoalDeadline}
+                onChange={(value) => {
+                  setNewGoalDeadline(value);
+                  setIsDatePickerOpen(false);
+                }}
+              />
+            </div>
+          )}
           <button
             onClick={handleCreateGoal}
             className="ml-2 p-2 bg-blue-500 text-white rounded-full hover:bg-blue-600 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-opacity-50"

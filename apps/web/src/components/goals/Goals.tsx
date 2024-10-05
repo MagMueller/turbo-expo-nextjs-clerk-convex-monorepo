@@ -9,9 +9,18 @@ import GoalItem from "./Goaltem";
 
 const Goals = () => {
   const [search, setSearch] = useState("");
+  const [newGoalTitle, setNewGoalTitle] = useState("");
 
   const allGoals = useQuery(api.goals.getGoals);
   const deleteGoal = useMutation(api.goals.deleteGoal);
+  const createGoal = useMutation(api.goals.createGoal);
+
+  const handleCreateGoal = async (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter' && newGoalTitle.trim() !== '') {
+      await createGoal({ title: newGoalTitle, content: '', isSummary: false });
+      setNewGoalTitle('');
+    }
+  };
 
   const finalGoals = search
     ? allGoals?.filter(
@@ -27,7 +36,7 @@ const Goals = () => {
         Your Goals
       </h1>
       <div className="px-5 sm:px-0">
-        <div className="bg-white flex items-center h-[39px] sm:h-[55px] rounded border border-solid gap-2 sm:gap-5 mb-10 border-[rgba(0,0,0,0.40)] px-3 sm:px-11">
+        <div className="bg-white flex items-center h-[39px] sm:h-[55px] rounded border border-solid gap-2 sm:gap-5 mb-6 border-[rgba(0,0,0,0.40)] px-3 sm:px-11">
           <Image
             src={"/images/search.svg"}
             width={23}
@@ -40,6 +49,19 @@ const Goals = () => {
             placeholder="Search"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
+            className="flex-1 text-[#2D2D2D] text-[17px] sm:text-2xl not-italic font-light leading-[114.3%] tracking-[-0.6px] focus:outline-0 focus:ring-0 focus:border-0 border-0"
+          />
+        </div>
+      </div>
+
+      <div className="px-5 sm:px-0 mb-6">
+        <div className="bg-white flex items-center h-[39px] sm:h-[55px] rounded border border-solid gap-2 sm:gap-5 border-[rgba(0,0,0,0.40)] px-3 sm:px-11">
+          <input
+            type="text"
+            placeholder="Type a new goal and press Enter"
+            value={newGoalTitle}
+            onChange={(e) => setNewGoalTitle(e.target.value)}
+            onKeyPress={handleCreateGoal}
             className="flex-1 text-[#2D2D2D] text-[17px] sm:text-2xl not-italic font-light leading-[114.3%] tracking-[-0.6px] focus:outline-0 focus:ring-0 focus:border-0 border-0"
           />
         </div>

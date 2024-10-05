@@ -4,12 +4,12 @@ import Link from "next/link";
 import { Avatar, AvatarFallback, AvatarImage } from "./avatar";
 import { Button } from "./button";
 import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuLabel,
-    DropdownMenuSeparator,
-    DropdownMenuTrigger,
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
 } from "./dropdown-menu";
 
 export function UserNav({
@@ -48,7 +48,7 @@ export function UserNav({
         <Link href="/goals">
           <DropdownMenuItem className="hover:cursor-pointer hover:bg-gray-200">
             <Paintbrush2 className="mr-2 h-4 w-4 text-black" />
-            <span className="text-black">Dashboard</span>
+            <span className="text-black">Home</span>
           </DropdownMenuItem>
         </Link>
         <DropdownMenuItem

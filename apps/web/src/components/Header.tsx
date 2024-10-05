@@ -1,10 +1,13 @@
 "use client";
 
+import { useUser } from "@clerk/clerk-react";
 import Link from 'next/link';
 import { useState } from 'react';
+import { UserNav } from "./common/UserNav";
 
 const Header = () => {
   const [activeTab, setActiveTab] = useState('goals');
+  const { isSignedIn, user } = useUser();
 
   const tabs = [
     { name: 'Goals', href: '/goals', id: 'goals' },
@@ -38,6 +41,19 @@ const Header = () => {
                 ))}
               </div>
             </div>
+          </div>
+          <div className="flex items-center">
+            {isSignedIn ? (
+              <UserNav
+                image={user?.imageUrl}
+                name={user?.fullName ?? ''}
+                email={user?.primaryEmailAddress?.emailAddress ?? ''}
+              />
+            ) : (
+              <Link href="/sign-in" className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-700">
+                Login
+              </Link>
+            )}
           </div>
         </div>
       </div>

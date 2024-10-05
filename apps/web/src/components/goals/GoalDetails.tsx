@@ -29,6 +29,9 @@ const GoalDetails = ({ goalId }: GoalDetailsProps) => {
             ? currentGoal?.summary
             : "No Summary available"}
       </p>
+      <p className="text-[#2D2D2D] text-center text-xl not-italic font-extralight leading-[114.3%] tracking-[-0.5px]">
+        Created on: {new Date(Number(currentGoal?._creationTime)).toLocaleDateString()}
+      </p>
     </div>
   );
 };

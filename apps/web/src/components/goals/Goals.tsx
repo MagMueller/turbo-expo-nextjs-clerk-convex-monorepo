@@ -68,6 +68,7 @@ const Goals: React.FC = () => {
                   setNewGoalDeadline(value);
                   setIsDatePickerOpen(false);
                 }}
+                onClose={() => setIsDatePickerOpen(false)}
               />
             </div>
           )}

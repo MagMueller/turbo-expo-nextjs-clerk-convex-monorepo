@@ -1,6 +1,6 @@
 import Image from 'next/image';
 import Link from "next/link";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import DatePicker from "./DatePicker";
 
 export interface GoalProps {
@@ -16,6 +16,9 @@ export interface GoalProps {
 
 const GoalItem = ({ goal, deleteGoal, updateGoal }: GoalProps) => {
   const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);
+  const [datePickerPosition, setDatePickerPosition] = useState({ top: 0, left: 0 });
+  const buttonRef = useRef<HTMLButtonElement>(null);
+
   const daysUntilDeadline = goal.deadline
     ? Math.ceil((new Date(goal.deadline).getTime() - new Date().getTime()) / (1000 * 3600 * 24))
     : null;
@@ -23,6 +26,17 @@ const GoalItem = ({ goal, deleteGoal, updateGoal }: GoalProps) => {
   const handleDeadlineChange = (newDeadline: string) => {
     updateGoal(goal._id, newDeadline);
     setIsDatePickerOpen(false);
+  };
+
+  const handleDatePickerToggle = () => {
+    if (!isDatePickerOpen && buttonRef.current) {
+      const rect = buttonRef.current.getBoundingClientRect();
+      setDatePickerPosition({
+        top: rect.bottom + window.scrollY + 10,
+        left: rect.left + window.scrollX - 100,
+      });
+    }
+    setIsDatePickerOpen(!isDatePickerOpen);
   };
 
   return (
@@ -34,7 +48,8 @@ const GoalItem = ({ goal, deleteGoal, updateGoal }: GoalProps) => {
       </Link>
       <div className="relative">
         <button
-          onClick={() => setIsDatePickerOpen(!isDatePickerOpen)}
+          ref={buttonRef}
+          onClick={handleDatePickerToggle}
           className="text-[#2D2D2D] text-center text-xl font-medium leading-[114.3%] tracking-[-0.5px]"
           title={goal.deadline ? new Date(goal.deadline).toLocaleDateString() : "Set deadline"}
         >
@@ -49,6 +64,7 @@ const GoalItem = ({ goal, deleteGoal, updateGoal }: GoalProps) => {
             <DatePicker
               value={goal.deadline || ""}
               onChange={handleDeadlineChange}
+              onClose={() => setIsDatePickerOpen(false)}
             />
           </div>
         )}

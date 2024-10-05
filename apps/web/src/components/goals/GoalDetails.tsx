@@ -2,9 +2,10 @@
 
 import { api } from "@packages/backend/convex/_generated/api";
 import { Id } from "@packages/backend/convex/_generated/dataModel";
-import { useQuery } from "convex/react";
+import { useMutation, useQuery } from "convex/react";
 import { useState } from "react";
 import ComplexToggle from "../home/ComplexToggle";
+import DatePicker from "./DatePicker";
 
 interface GoalDetailsProps {
   goalId: Id<"goals">;
@@ -13,6 +14,13 @@ interface GoalDetailsProps {
 const GoalDetails = ({ goalId }: GoalDetailsProps) => {
   const [isSummary, setIsSummary] = useState(false);
   const currentGoal = useQuery(api.goals.getGoal, { id: goalId });
+  const updateGoal = useMutation(api.goals.updateGoal);
+
+  const handleDeadlineChange = (newDeadline: string) => {
+    if (currentGoal) {
+      updateGoal({ id: goalId, deadline: newDeadline });
+    }
+  };
 
   return (
     <div className="container space-y-6 sm:space-y-9 py-20 px-[26px] sm:px-0">
@@ -29,6 +37,15 @@ const GoalDetails = ({ goalId }: GoalDetailsProps) => {
             ? currentGoal?.summary
             : "No Summary available"}
       </p>
+      <div className="flex justify-center items-center space-x-4">
+        <p className="text-[#2D2D2D] text-center text-xl not-italic font-extralight leading-[114.3%] tracking-[-0.5px]">
+          Deadline:
+        </p>
+        <DatePicker
+          value={currentGoal?.deadline || ""}
+          onChange={handleDeadlineChange}
+        />
+      </div>
       <p className="text-[#2D2D2D] text-center text-xl not-italic font-extralight leading-[114.3%] tracking-[-0.5px]">
         Created on: {new Date(Number(currentGoal?._creationTime)).toLocaleDateString()}
       </p>

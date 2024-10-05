@@ -69,3 +69,11 @@ export const deleteGoal = mutation({
     await ctx.db.delete(args.goalId);
   },
 });
+
+export const updateGoal = mutation({
+  args: { id: v.id("goals"), deadline: v.optional(v.string()) },
+  handler: async (ctx, args) => {
+    const { id, deadline } = args;
+    await ctx.db.patch(id, { deadline });
+  },
+});

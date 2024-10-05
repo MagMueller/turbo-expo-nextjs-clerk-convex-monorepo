@@ -2,8 +2,8 @@
 
 import { api } from "@packages/backend/convex/_generated/api";
 import { useMutation, useQuery } from "convex/react";
-import Image from 'next/image';
 import React, { useState } from 'react';
+import DatePicker from "./DatePicker";
 import GoalItem from "./Goaltem";
 
 const Goals: React.FC = () => {
@@ -14,9 +14,10 @@ const Goals: React.FC = () => {
   const allGoals = useQuery(api.goals.getGoals);
   const deleteGoal = useMutation(api.goals.deleteGoal);
   const createGoal = useMutation(api.goals.createGoal);
+  const updateGoal = useMutation(api.goals.updateGoal);
 
-  const handleCreateGoal = async (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter' && newGoalTitle.trim() !== '') {
+  const handleCreateGoal = async () => {
+    if (newGoalTitle.trim() !== '') {
       await createGoal({ 
         title: newGoalTitle, 
         content: '', 
@@ -41,24 +42,7 @@ const Goals: React.FC = () => {
       <h1 className="text-[#2D2D2D] text-center text-[20px] sm:text-[43px] not-italic font-normal sm:font-medium leading-[114.3%] tracking-[-1.075px] sm:mt-8 my-4  sm:mb-10">
         Your Goals
       </h1>
-      <div className="px-5 sm:px-0">
-        <div className="bg-white flex items-center h-[39px] sm:h-[55px] rounded border border-solid gap-2 sm:gap-5 mb-6 border-[rgba(0,0,0,0.40)] px-3 sm:px-11">
-          <Image
-            src={"/images/search.svg"}
-            width={23}
-            height={22}
-            alt="search"
-            className="cursor-pointer sm:w-[23px] sm:h-[22px] w-[20px] h-[20px]"
-          />
-          <input
-            type="text"
-            placeholder="Search"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="flex-1 text-[#2D2D2D] text-[17px] sm:text-2xl not-italic font-light leading-[114.3%] tracking-[-0.6px] focus:outline-0 focus:ring-0 focus:border-0 border-0"
-          />
-        </div>
-      </div>
+      
       <div className="px-5 sm:px-0 mb-6">
         <div className="bg-white flex items-center h-[39px] sm:h-[55px] rounded border border-solid gap-2 sm:gap-5 border-[rgba(0,0,0,0.40)] px-3 sm:px-11">
           <input
@@ -66,21 +50,27 @@ const Goals: React.FC = () => {
             placeholder="Type a new goal and press Enter"
             value={newGoalTitle}
             onChange={(e) => setNewGoalTitle(e.target.value)}
-            onKeyPress={handleCreateGoal}
+            onKeyPress={(e) => e.key === 'Enter' && handleCreateGoal()}
             className="flex-1 text-[#2D2D2D] text-[17px] sm:text-2xl not-italic font-light leading-[114.3%] tracking-[-0.6px] focus:outline-0 focus:ring-0 focus:border-0 border-0"
           />
-          <input
-            type="date"
+          <DatePicker
             value={newGoalDeadline}
-            onChange={(e) => setNewGoalDeadline(e.target.value)}
-            className="text-[#2D2D2D] text-[17px] sm:text-2xl not-italic font-light leading-[114.3%] tracking-[-0.6px] focus:outline-0 focus:ring-0 focus:border-0 border-0"
+            onChange={setNewGoalDeadline}
           />
+          <button
+            onClick={handleCreateGoal}
+            className="ml-2 p-2 bg-blue-500 text-white rounded-full hover:bg-blue-600 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-opacity-50"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+            </svg>
+          </button>
         </div>
       </div>
       <div className="border-[0.5px] mb-20 divide-y-[0.5px] divide-[#00000096] border-[#00000096]">
         {finalGoals &&
           finalGoals.map((goal, index) => (
-            <GoalItem key={index} goal={goal} deleteGoal={deleteGoal} />
+            <GoalItem key={index} goal={goal} deleteGoal={deleteGoal} updateGoal={(id, deadline) => updateGoal({ id, deadline })} />
           ))}
       </div>
     </div>

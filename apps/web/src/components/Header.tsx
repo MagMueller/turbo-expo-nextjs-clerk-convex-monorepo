@@ -1,6 +1,7 @@
 "use client";
 
 import { useUser } from "@clerk/clerk-react";
+import { SignInButton } from "@clerk/nextjs";
 import Link from 'next/link';
 import { useState } from 'react';
 import { UserNav } from "./common/UserNav";
@@ -12,7 +13,7 @@ const Header = () => {
   const tabs = [
     { name: 'Goals', href: '/goals', id: 'goals' },
     { name: 'Friends', href: '/friends', id: 'friends' },
-    { name: 'Verifier Tasks', href: '/verifier', id: 'verifier' },
+    { name: 'Verify', href: '/verifier', id: 'verifier' },
   ];
 
   return (
@@ -50,9 +51,11 @@ const Header = () => {
                 email={user?.primaryEmailAddress?.emailAddress ?? ''}
               />
             ) : (
-              <Link href="/sign-in" className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-700">
-                Login
-              </Link>
+              <SignInButton mode="modal">
+                <button className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-700">
+                  Login
+                </button>
+              </SignInButton>
             )}
           </div>
         </div>

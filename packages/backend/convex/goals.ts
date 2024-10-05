@@ -122,3 +122,31 @@ export const verifyGoal = mutation({
     await ctx.db.patch(goalId, { status });
   },
 });
+
+export const getFriendGoals = query({
+  args: { friendId: v.string() },
+  handler: async (ctx, { friendId }) => {
+    const userId = await getUserId(ctx);
+    if (!userId) return null;
+
+    const areFriends = await ctx.db
+      .query("friends")
+      .filter((q) => 
+        q.and(
+          q.eq(q.field("userId"), userId),
+          q.eq(q.field("friendId"), friendId),
+          q.eq(q.field("status"), "accepted")
+        )
+      )
+      .first();
+
+    if (!areFriends) return null;
+
+    const goals = await ctx.db
+      .query("goals")
+      .filter((q) => q.eq(q.field("userId"), friendId))
+      .collect();
+
+    return goals;
+  },
+});

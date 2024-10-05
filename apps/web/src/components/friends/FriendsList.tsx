@@ -1,34 +1,21 @@
 "use client";
 import { api } from "@packages/backend/convex/_generated/api";
 import { useMutation, useQuery } from "convex/react";
+import Link from "next/link";
 import { useState } from "react";
 
 const FriendsList = () => {
-  const [newFriendEmail, setNewFriendEmail] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
   const friends = useQuery(api.friends.getFriends);
   const searchUsers = useQuery(api.friends.searchUsers, { query: searchQuery });
   const addFriend = useMutation(api.friends.addFriend);
   const acceptFriendRequest = useMutation(api.friends.acceptFriendRequest);
-  const inviteUser = useMutation(api.friends.inviteUser);
 
-  const handleAddFriend = async (email: string) => {
+  const handleAddFriend = async (friendId: string) => {
     try {
-      await addFriend({ friendEmail: email });
-      setNewFriendEmail("");
-      setSearchQuery("");
+      await addFriend({ friendId });
     } catch (error) {
       console.error("Error adding friend:", error);
-    }
-  };
-
-  const handleInviteUser = async (email: string) => {
-    try {
-      await inviteUser({ email });
-      setNewFriendEmail("");
-      setSearchQuery("");
-    } catch (error) {
-      console.error("Error inviting user:", error);
     }
   };
 
@@ -41,7 +28,7 @@ const FriendsList = () => {
       <div className="mb-6">
         <input
           type="text"
-          placeholder="Search users or enter email to invite"
+          placeholder="Search users"
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           className="mr-2 p-2 border rounded w-full"
@@ -53,9 +40,11 @@ const FriendsList = () => {
           <h2 className="text-xl font-semibold mb-2">Search Results</h2>
           {searchUsers.map((user) => (
             <div key={user.userId} className="flex justify-between items-center p-2 bg-gray-100 rounded mb-2">
-              <span>{user.name} ({user.email})</span>
+              <Link href={`/friends/${user.userId}`}>
+                <span>{user.name}</span>
+              </Link>
               <button
-                onClick={() => handleAddFriend(user.email)}
+                onClick={() => handleAddFriend(user.userId)}
                 className="p-2 bg-blue-500 text-white rounded"
               >
                 Add Friend
@@ -65,22 +54,13 @@ const FriendsList = () => {
         </div>
       )}
 
-      {searchQuery && !searchUsers?.some(user => user.email === searchQuery) && (
-        <div className="mb-6">
-          <button
-            onClick={() => handleInviteUser(searchQuery)}
-            className="p-2 bg-green-500 text-white rounded"
-          >
-            Invite {searchQuery}
-          </button>
-        </div>
-      )}
-
       <div className="space-y-4">
         <h2 className="text-xl font-semibold mb-2">Your Friends</h2>
         {friends?.map((friend) => (
           <div key={friend._id} className="flex justify-between items-center p-4 bg-gray-100 rounded">
-            <span>{friend.friendId}</span>
+            <Link href={`/friends/${friend.friendId}`}>
+              <span>{friend.friendId}</span>
+            </Link>
             {friend.status === "pending" && (
               <button
                 onClick={() => acceptFriendRequest({ friendId: friend.friendId })}

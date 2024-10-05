@@ -17,35 +17,37 @@ export const getFriends = query({
   },
 });
 
+export const searchUsers = query({
+  args: { query: v.string() },
+  handler: async (ctx, { query }) => {
+    const users = await ctx.db
+      .query("users")
+      .filter((q) => 
+        q.or(
+          q.eq(q.field("name"), query),
+          q.eq(q.field("email"), query)
+        )
+      )
+      .collect();
+
+    return users;
+  },
+});
+
 export const addFriend = mutation({
-  args: { friendEmail: v.string() },
-  handler: async (ctx, { friendEmail }) => {
+  args: { friendId: v.string() },
+  handler: async (ctx, { friendId }) => {
     const userId = await getUserId(ctx);
     if (!userId) throw new Error("User not found");
 
-    const friend = await ctx.db
-      .query("users")
-      .filter((q) => q.eq(q.field("email"), friendEmail))
-      .first();
-
-    if (!friend) throw new Error("Friend not found");
-
     await ctx.db.insert("friends", {
       userId,
-      friendId: friend.userId,
+      friendId,
       status: "pending",
     });
   },
 });
 
-// Add this mutation
-export const updateVerifier = mutation({
-  args: { id: v.id("goals"), verifierId: v.string() },
-  handler: async (ctx, args) => {
-    const { id, verifierId } = args;
-    await ctx.db.patch(id, { verifierId });
-  },
-});
 export const acceptFriendRequest = mutation({
   args: { friendId: v.string() },
   handler: async (ctx, { friendId }) => {
@@ -64,23 +66,12 @@ export const acceptFriendRequest = mutation({
   },
 });
 
-// Add these new mutations and queries
-
-export const searchUsers = query({
-  args: { query: v.string() },
-  handler: async (ctx, { query }) => {
-    const users = await ctx.db
-      .query("users")
-      .filter((q) => 
-        q.or(
-          q.eq(q.field("name"), query),
-          q.eq(q.field("email"), query),
-          
-        )
-      )
-      .collect();
-
-    return users;
+// Add this mutation
+export const updateVerifier = mutation({
+  args: { id: v.id("goals"), verifierId: v.string() },
+  handler: async (ctx, args) => {
+    const { id, verifierId } = args;
+    await ctx.db.patch(id, { verifierId });
   },
 });
 

@@ -158,14 +158,19 @@ export const rejectFriendRequest = mutation({
     const userId = await getUserId(ctx);
     if (!userId) throw new Error("User not found");
 
-    await ctx.db
+    const friendRequest = await ctx.db
       .query("friends")
       .filter((q) => 
         q.and(
           q.eq(q.field("userId"), friendId),
-          q.eq(q.field("friendId"), userId)
+          q.eq(q.field("friendId"), userId),
+          q.eq(q.field("status"), "pending")
         )
       )
-      .delete();
+      .first();
+
+    if (!friendRequest) throw new Error("Friend request not found");
+
+    await ctx.db.delete(friendRequest._id);
   },
 });

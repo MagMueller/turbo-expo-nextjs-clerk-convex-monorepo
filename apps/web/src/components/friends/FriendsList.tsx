@@ -10,7 +10,8 @@ const FriendsList = () => {
   const searchUsers = useQuery(api.friends.searchUsers, { query: searchQuery });
   const addFriend = useMutation(api.friends.addFriend);
   const acceptFriendRequest = useMutation(api.friends.acceptFriendRequest);
-
+  const currentUser = useQuery(api.users.getCurrentUser);
+  
   const handleAddFriend = async (friendId: string) => {
     try {
       await addFriend({ friendId });
@@ -35,9 +36,9 @@ const FriendsList = () => {
         />
       </div>
 
-      {searchUsers && searchUsers.length > 0 && (
+      {searchUsers && (
         <div className="mb-6">
-          <h2 className="text-xl font-semibold mb-2">Search Results</h2>
+          <h2 className="text-xl font-semibold mb-2">Users</h2>
           {searchUsers.map((user) => (
             <div key={user.userId} className="flex justify-between items-center p-2 bg-gray-100 rounded mb-2">
               <Link href={`/friends/${user.userId}`}>
@@ -59,7 +60,7 @@ const FriendsList = () => {
         {friends?.map((friend) => (
           <div key={friend._id} className="flex justify-between items-center p-4 bg-gray-100 rounded">
             <Link href={`/friends/${friend.friendId}`}>
-              <span>{friend.friendId}</span>
+              <span>{friend.friendName}</span>
             </Link>
             {friend.status === "pending" && (
               <button

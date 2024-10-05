@@ -7,5 +7,6 @@ export default defineSchema({
     title: v.string(),
     content: v.string(),
     summary: v.optional(v.string()),
+    deadline: v.optional(v.string()),
   }),
 });

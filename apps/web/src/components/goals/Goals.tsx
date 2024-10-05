@@ -2,14 +2,14 @@
 
 import { api } from "@packages/backend/convex/_generated/api";
 import { useMutation, useQuery } from "convex/react";
-import Image from "next/image";
-import { useState } from "react";
-import CreateGoal from "./CreateGoal";
+import Image from 'next/image';
+import React, { useState } from 'react';
 import GoalItem from "./Goaltem";
 
-const Goals = () => {
+const Goals: React.FC = () => {
   const [search, setSearch] = useState("");
   const [newGoalTitle, setNewGoalTitle] = useState("");
+  const [newGoalDeadline, setNewGoalDeadline] = useState("");
 
   const allGoals = useQuery(api.goals.getGoals);
   const deleteGoal = useMutation(api.goals.deleteGoal);
@@ -17,16 +17,22 @@ const Goals = () => {
 
   const handleCreateGoal = async (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter' && newGoalTitle.trim() !== '') {
-      await createGoal({ title: newGoalTitle, content: '', isSummary: false });
+      await createGoal({ 
+        title: newGoalTitle, 
+        content: '', 
+        isSummary: false,
+        deadline: newGoalDeadline || undefined
+      });
       setNewGoalTitle('');
+      setNewGoalDeadline('');
     }
   };
 
-  const finalGoals = search
-    ? allGoals?.filter(
+  const finalGoals = search && allGoals
+    ? allGoals.filter(
         (goal) =>
           goal.title.toLowerCase().includes(search.toLowerCase()) ||
-          goal.content.toLowerCase().includes(search.toLowerCase()),
+          (goal.content && goal.content.toLowerCase().includes(search.toLowerCase())),
       )
     : allGoals;
 
@@ -53,7 +59,6 @@ const Goals = () => {
           />
         </div>
       </div>
-
       <div className="px-5 sm:px-0 mb-6">
         <div className="bg-white flex items-center h-[39px] sm:h-[55px] rounded border border-solid gap-2 sm:gap-5 border-[rgba(0,0,0,0.40)] px-3 sm:px-11">
           <input
@@ -64,17 +69,20 @@ const Goals = () => {
             onKeyPress={handleCreateGoal}
             className="flex-1 text-[#2D2D2D] text-[17px] sm:text-2xl not-italic font-light leading-[114.3%] tracking-[-0.6px] focus:outline-0 focus:ring-0 focus:border-0 border-0"
           />
+          <input
+            type="date"
+            value={newGoalDeadline}
+            onChange={(e) => setNewGoalDeadline(e.target.value)}
+            className="text-[#2D2D2D] text-[17px] sm:text-2xl not-italic font-light leading-[114.3%] tracking-[-0.6px] focus:outline-0 focus:ring-0 focus:border-0 border-0"
+          />
         </div>
       </div>
-
       <div className="border-[0.5px] mb-20 divide-y-[0.5px] divide-[#00000096] border-[#00000096]">
         {finalGoals &&
           finalGoals.map((goal, index) => (
             <GoalItem key={index} goal={goal} deleteGoal={deleteGoal} />
           ))}
       </div>
-
-      <CreateGoal />
     </div>
   );
 };

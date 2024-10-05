@@ -1,4 +1,3 @@
-
 import { Auth } from "convex/server";
 import { v } from "convex/values";
 import { internal } from "./_generated/api";
@@ -43,11 +42,12 @@ export const createGoal = mutation({
     title: v.string(),
     content: v.string(),
     isSummary: v.boolean(),
+    deadline: v.optional(v.string()),
   },
-  handler: async (ctx, { title, content, isSummary }) => {
+  handler: async (ctx, { title, content, isSummary, deadline }) => {
     const userId = await getUserId(ctx);
     if (!userId) throw new Error("User not found");
-    const goalId = await ctx.db.insert("goals", { userId, title, content });
+    const goalId = await ctx.db.insert("goals", { userId, title, content, deadline });
 
     if (isSummary) {
       await ctx.scheduler.runAfter(0, internal.openai.summary, {

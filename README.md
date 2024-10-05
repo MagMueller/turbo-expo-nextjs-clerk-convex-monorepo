@@ -10,12 +10,12 @@ featuring:
 - [Clerk](https://clerk.dev): User authentication
 - OpenAI: Text summarization (optional)
 
-The example app is a note taking app that can summarize notes using AI. Features
+The example app is a goal taking app that can summarize goals using AI. Features
 include:
 
 - Marketing page
 - Dashboard page (web & native)
-- Note taking page (web & native)
+- Goal taking page (web & native)
 - Backend API that serves web & native with the same API
 - Relational database
 - End to end type safety (schema definition to frontend API clients)
@@ -33,7 +33,7 @@ Run `yarn`.
 
 ### 2. Configure Convex
 
-> Note: The following command will print an error and ask you to add the
+> Goal: The following command will print an error and ask you to add the
 > appropriate environment variable to proceed. Continue reading on for how to do
 > that.
 

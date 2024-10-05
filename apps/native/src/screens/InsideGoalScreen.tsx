@@ -1,18 +1,18 @@
 import React, { useState } from "react";
 import {
-  StyleSheet,
-  Text,
-  View,
-  Image,
-  Dimensions,
-  TouchableOpacity,
-  ScrollView,
+    Dimensions,
+    Image,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View,
 } from "react-native";
 import { RFValue } from "react-native-responsive-fontsize";
 
 const { width } = Dimensions.get("window");
 
-export default function InsideNoteScreen({ route, navigation }) {
+export default function InsideGoalScreen({ route, navigation }) {
   const { item } = route.params;
   console.log({ item });
   const [activeTab, setActiveTab] = useState("original"); // State to manage active tab

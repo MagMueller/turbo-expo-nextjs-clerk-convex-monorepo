@@ -2,14 +2,14 @@ import Image from "next/image";
 
 const benefits = [
   {
-    title: "Effortless Note-Taking",
+    title: "Effortless Goal-Taking",
     description: "Capture thoughts effortlessly with our intuitive interface",
     image: "/images/goodNews.png",
   },
   {
     title: "Seamless Sync",
     description:
-      "Access your notes anytime, anywhere, with seamless cloud synchronization.",
+      "Access your goals anytime, anywhere, with seamless cloud synchronization.",
     image: "/images/cloudSync.png",
   },
   {
@@ -21,7 +21,7 @@ const benefits = [
   {
     title: "AI-Powered Insights",
     description:
-      "Gain valuable insights with smart analytics based on your note patterns.",
+      "Gain valuable insights with smart analytics based on your goal patterns.",
     image: "/images/bot.png",
   },
 ];
@@ -41,7 +41,7 @@ const Benefits = () => {
           Benefits
         </p>
         <h3 className=" text-black text-3xl sm:text-[57px] not-italic font-medium leading-[90.3%] tracking-[-1.425px] font-montserrat text-center pb-[46px] sm:pb-[87px]">
-          Why Choose UseNotes
+          Why Choose UseGoals
         </h3>
 
         <div className="relative">

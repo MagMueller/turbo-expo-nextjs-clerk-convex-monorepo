@@ -1,13 +1,13 @@
 "use client";
 
-import { Fragment, useRef, useState } from "react";
 import { Dialog, Transition } from "@headlessui/react";
-import Image from "next/image";
-import Checkbox from "./Checkbox";
 import { api } from "@packages/backend/convex/_generated/api";
 import { useMutation, useQuery } from "convex/react";
+import Image from "next/image";
+import { Fragment, useRef, useState } from "react";
+import Checkbox from "./Checkbox";
 
-export default function CreateNote() {
+export default function CreateGoal() {
   const [open, setOpen] = useState(false);
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
@@ -15,11 +15,11 @@ export default function CreateNote() {
 
   const cancelButtonRef = useRef(null);
 
-  const createNote = useMutation(api.notes.createNote);
+  const createGoal = useMutation(api.goals.createGoal);
   const openaiKeySet = useQuery(api.openai.openaiKeySet) ?? true;
 
-  const createUserNote = async () => {
-    await createNote({
+  const createUserGoal = async () => {
+    await createGoal({
       title,
       content,
       isSummary: isChecked,
@@ -43,7 +43,7 @@ export default function CreateNote() {
           />
           <span className="text-[17px] sm:text-3xl not-italic font-medium leading-[79%] tracking-[-0.75px]">
             {" "}
-            New Note
+            New Goal
           </span>
         </button>
       </div>
@@ -86,7 +86,7 @@ export default function CreateNote() {
                           as="h3"
                           className="text-black text-center text-xl sm:text-left sm:text-[35px] pb-6 sm:pb-8 not-italic font-semibold leading-[90.3%] tracking-[-0.875px]"
                         >
-                          Create New Note
+                          Create New Goal
                         </Dialog.Title>
                         <div className="mt-2 space-y-3">
                           <div className="pb-2">
@@ -101,7 +101,7 @@ export default function CreateNote() {
                                 id="title"
                                 name="title"
                                 type="text"
-                                placeholder="Note Title"
+                                placeholder="Goal Title"
                                 autoComplete="title"
                                 value={title}
                                 onChange={(e) => setTitle(e.target.value)}
@@ -115,14 +115,14 @@ export default function CreateNote() {
                               htmlFor="description"
                               className=" text-black text-[17px] sm:text-2xl not-italic font-medium leading-[90.3%] tracking-[-0.6px]"
                             >
-                              The Note
+                              The Goal
                             </label>
                             <div className="mt-2 pb-[18px]">
                               <textarea
                                 id="description"
                                 name="description"
                                 rows={8}
-                                placeholder="Start your note "
+                                placeholder="Start your goal "
                                 className="block w-full rounded-md border-0 py-1.5  border-[#D0D5DD] text-2xl shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600  sm:leading-6 text-black text-[17px] not-italic font-light leading-[90.3%] tracking-[-0.425px] sm:text-2xl"
                                 value={content}
                                 onChange={(e) => setContent(e.target.value)}
@@ -146,7 +146,7 @@ export default function CreateNote() {
                     <button
                       type="button"
                       className="button text-white text-center text-[17px] sm:text-2xl not-italic font-semibold leading-[90.3%] tracking-[-0.6px] px-[70px] py-2"
-                      onClick={createUserNote}
+                      onClick={createUserGoal}
                     >
                       Create
                     </button>

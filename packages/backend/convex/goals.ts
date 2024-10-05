@@ -1,43 +1,44 @@
-import { mutation, query } from "./_generated/server";
-import { v } from "convex/values";
-import { internal } from "../convex/_generated/api";
+
 import { Auth } from "convex/server";
+import { v } from "convex/values";
+import { internal } from "./_generated/api";
+import { mutation, query } from "./_generated/server";
 
 export const getUserId = async (ctx: { auth: Auth }) => {
   return (await ctx.auth.getUserIdentity())?.subject;
 };
 
-// Get all notes for a specific user
-export const getNotes = query({
+// Get all goals for a specific user
+export const getGoals = query({
   args: {},
   handler: async (ctx) => {
     const userId = await getUserId(ctx);
     if (!userId) return null;
 
-    const notes = await ctx.db
-      .query("notes")
+    const goals = await ctx.db
+      .query("goals")
       .filter((q) => q.eq(q.field("userId"), userId))
       .collect();
 
-    return notes;
+    return goals;
   },
 });
 
-// Get note for a specific note
-export const getNote = query({
+// Get goal for a specific goal
+export const getGoal = query({
   args: {
-    id: v.optional(v.id("notes")),
+    id: v.optional(v.id("goals")),
   },
   handler: async (ctx, args) => {
     const { id } = args;
     if (!id) return null;
-    const note = await ctx.db.get(id);
-    return note;
+    const goal = await ctx.db.get(id);
+    return goal;
   },
 });
 
-// Create a new note for a user
-export const createNote = mutation({
+// Create a new goal for a user
+export const createGoal = mutation({
   args: {
     title: v.string(),
     content: v.string(),
@@ -46,25 +47,25 @@ export const createNote = mutation({
   handler: async (ctx, { title, content, isSummary }) => {
     const userId = await getUserId(ctx);
     if (!userId) throw new Error("User not found");
-    const noteId = await ctx.db.insert("notes", { userId, title, content });
+    const goalId = await ctx.db.insert("goals", { userId, title, content });
 
     if (isSummary) {
       await ctx.scheduler.runAfter(0, internal.openai.summary, {
-        id: noteId,
+        id: goalId,
         title,
         content,
       });
     }
 
-    return noteId;
+    return goalId;
   },
 });
 
-export const deleteNote = mutation({
+export const deleteGoal = mutation({
   args: {
-    noteId: v.id("notes"),
+    goalId: v.id("goals"),
   },
   handler: async (ctx, args) => {
-    await ctx.db.delete(args.noteId);
+    await ctx.db.delete(args.goalId);
   },
 });

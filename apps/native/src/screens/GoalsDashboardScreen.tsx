@@ -1,47 +1,47 @@
-import React, { useState } from "react";
-import {
-  StyleSheet,
-  View,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  Image,
-  FlatList,
-  Dimensions,
-} from "react-native";
-import { Feather, AntDesign } from "@expo/vector-icons";
-import { RFValue } from "react-native-responsive-fontsize";
-import { useAuth, useUser } from "@clerk/clerk-expo";
+import { useUser } from "@clerk/clerk-expo";
+import { AntDesign, Feather } from "@expo/vector-icons";
 import { api } from "@packages/backend/convex/_generated/api";
 import { useQuery } from "convex/react";
+import React, { useState } from "react";
+import {
+    Dimensions,
+    FlatList,
+    Image,
+    StyleSheet,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View,
+} from "react-native";
+import { RFValue } from "react-native-responsive-fontsize";
 
-const NotesDashboardScreen = ({ navigation }) => {
+const GoalsDashboardScreen = ({ navigation }) => {
   const user = useUser();
   const imageUrl = user?.user?.imageUrl;
   const firstName = user?.user?.firstName;
 
-  const allNotes = useQuery(api.notes.getNotes);
+  const allGoals = useQuery(api.goals.getGoals);
   const [search, setSearch] = useState("");
 
-  const finalNotes = search
-    ? allNotes.filter(
-        (note) =>
-          note.title.toLowerCase().includes(search.toLowerCase()) ||
-          note.content.toLowerCase().includes(search.toLowerCase()),
+  const finalGoals = search
+    ? allGoals.filter(
+        (goal) =>
+          goal.title.toLowerCase().includes(search.toLowerCase()) ||
+          goal.content.toLowerCase().includes(search.toLowerCase()),
       )
-    : allNotes;
+    : allGoals;
 
   const renderItem = ({ item }) => (
     <TouchableOpacity
       onPress={() =>
-        navigation.navigate("InsideNoteScreen", {
+        navigation.navigate("InsideGoalScreen", {
           item: item,
         })
       }
       activeOpacity={0.5}
-      style={styles.noteItem}
+      style={styles.goalItem}
     >
-      <Text style={styles.noteText}>{item.title}</Text>
+      <Text style={styles.goalText}>{item.title}</Text>
     </TouchableOpacity>
   );
 
@@ -54,10 +54,10 @@ const NotesDashboardScreen = ({ navigation }) => {
         />
       </View>
 
-      <View style={styles.yourNotesContainer}>
+      <View style={styles.yourGoalsContainer}>
         {/* @ts-ignore, for css purposes */}
         <Image style={styles.avatarSmall} />
-        <Text style={styles.title}>Your Notes</Text>
+        <Text style={styles.title}>Your Goals</Text>
         {imageUrl ? (
           <Image style={styles.avatarSmall} source={{ uri: imageUrl }} />
         ) : (
@@ -78,18 +78,18 @@ const NotesDashboardScreen = ({ navigation }) => {
           style={styles.searchInput}
         />
       </View>
-      {!finalNotes || finalNotes.length === 0 ? (
+      {!finalGoals || finalGoals.length === 0 ? (
         <View style={styles.emptyState}>
           <Text style={styles.emptyStateText}>
-            Create your first note to{"\n"}get started
+            Create your first goal to{"\n"}get started
           </Text>
         </View>
       ) : (
         <FlatList
-          data={finalNotes}
+          data={finalGoals}
           renderItem={renderItem}
           keyExtractor={(item) => item._id}
-          style={styles.notesList}
+          style={styles.goalsList}
           contentContainerStyle={{
             marginTop: 19,
             borderTopWidth: 0.5,
@@ -99,11 +99,11 @@ const NotesDashboardScreen = ({ navigation }) => {
       )}
 
       <TouchableOpacity
-        onPress={() => navigation.navigate("CreateNoteScreen")}
-        style={styles.newNoteButton}
+        onPress={() => navigation.navigate("CreateGoalScreen")}
+        style={styles.newGoalButton}
       >
         <AntDesign name="pluscircle" size={20} color="#fff" />
-        <Text style={styles.newNoteButtonText}>Create a New Note</Text>
+        <Text style={styles.newGoalButtonText}>Create a New Goal</Text>
       </TouchableOpacity>
     </View>
   );
@@ -131,7 +131,7 @@ const styles = StyleSheet.create({
     fontFamily: "MMedium",
     alignSelf: "center",
   },
-  yourNotesContainer: {
+  yourGoalsContainer: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
@@ -162,23 +162,23 @@ const styles = StyleSheet.create({
     fontFamily: "MRegular",
     color: "#2D2D2D",
   },
-  notesList: {
+  goalsList: {
     flex: 1,
   },
-  noteItem: {
+  goalItem: {
     padding: 20,
     borderBottomWidth: 0.5,
     borderBottomColor: "rgba(0, 0, 0, 0.59)",
 
     backgroundColor: "#F9FAFB",
   },
-  noteText: {
+  goalText: {
     fontSize: 16,
     fontFamily: "MLight",
     color: "#2D2D2D",
   },
 
-  newNoteButton: {
+  newGoalButton: {
     flexDirection: "row",
     backgroundColor: "#0D87E1",
     borderRadius: 7,
@@ -199,7 +199,7 @@ const styles = StyleSheet.create({
 
     elevation: 6,
   },
-  newNoteButtonText: {
+  newGoalButtonText: {
     color: "white",
     fontSize: RFValue(15),
     fontFamily: "MMedium",
@@ -229,4 +229,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default NotesDashboardScreen;
+export default GoalsDashboardScreen;

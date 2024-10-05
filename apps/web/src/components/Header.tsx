@@ -1,12 +1,12 @@
 "use client";
 
+import { useUser } from "@clerk/clerk-react";
 import { Disclosure } from "@headlessui/react";
 import { Bars3Icon, XMarkIcon } from "@heroicons/react/24/outline";
-import Logo from "./common/Logo";
 import Link from "next/link";
-import { useUser } from "@clerk/clerk-react";
-import { UserNav } from "./common/UserNav";
 import { usePathname } from "next/navigation";
+import Logo from "./common/Logo";
+import { UserNav } from "./common/UserNav";
 
 type NavigationItem = {
   name: string;
@@ -57,12 +57,12 @@ export default function Header() {
                 )}
                 {user ? (
                   <div className="hidden sm:flex absolute inset-y-0 right-0 gap-6 items-center pr-2 sm:static sm:inset-auto sm:ml-6 sm:pr-0">
-                    <Link href="/notes">
+                    <Link href="/goals">
                       <button
                         type="button"
                         className=" text-white text-center text-xl not-italic font-normal leading-[normal] font-montserrat px-[22px] py-[11px] button"
                       >
-                        See your Notes
+                        See your Goals
                       </button>
                     </Link>
                     <UserNav
@@ -74,13 +74,13 @@ export default function Header() {
                 ) : (
                   <div className="hidden sm:flex absolute inset-y-0 right-0 gap-6 items-center pr-2 sm:static sm:inset-auto sm:ml-6 sm:pr-0">
                     <Link
-                      href="/notes"
+                      href="/goals"
                       className="border rounded-lg border-solid border-[#2D2D2D] text-[#2D2D2D] text-center text-xl not-italic font-normal leading-[normal] font-montserrat px-[22px] py-2.5"
                     >
                       Sign in
                     </Link>
                     <Link
-                      href="/notes"
+                      href="/goals"
                       className=" text-white text-center text-xl not-italic font-normal leading-[normal] font-montserrat px-[22px] py-[11px] button"
                     >
                       Get Started
@@ -118,13 +118,13 @@ export default function Header() {
               ))}
               <div className="flex gap-6 items-center pr-2 sm:static sm:inset-auto sm:ml-6 sm:pr-0">
                 <Link
-                  href="/notes"
+                  href="/goals"
                   className="border rounded-lg border-solid border-[#2D2D2D] text-[#2D2D2D] text-center text-xl not-italic font-normal leading-[normal] font-montserrat px-5 py-[5px]"
                 >
                   Sign in
                 </Link>
                 <Link
-                  href="/notes"
+                  href="/goals"
                   className=" text-white text-center text-xl not-italic font-normal leading-[normal] font-montserrat px-5 py-1.5 button"
                 >
                   Get Started

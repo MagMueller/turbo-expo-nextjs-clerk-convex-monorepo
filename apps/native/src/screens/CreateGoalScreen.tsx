@@ -1,32 +1,31 @@
-import React, { useState, useEffect } from "react";
-import {
-  StyleSheet,
-  Text,
-  View,
-  Image,
-  Dimensions,
-  TouchableOpacity,
-  TextInput,
-  Keyboard,
-  Animated,
-} from "react-native";
-import { RFValue } from "react-native-responsive-fontsize";
 import { AntDesign } from "@expo/vector-icons";
-import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import { api } from "@packages/backend/convex/_generated/api";
 import { useMutation, useQuery } from "convex/react";
-import { useAuth } from "@clerk/clerk-expo";
+import React, { useEffect, useState } from "react";
+import {
+    Animated,
+    Dimensions,
+    Image,
+    Keyboard,
+    StyleSheet,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View,
+} from "react-native";
+import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
+import { RFValue } from "react-native-responsive-fontsize";
 
 const { width } = Dimensions.get("window");
 
-export default function CreateNoteScreen({ navigation }) {
-  const createNote = useMutation(api.notes.createNote);
+export default function CreateGoalScreen({ navigation }) {
+  const createGoal = useMutation(api.goals.createGoal);
   const openaiKeySet = useQuery(api.openai.openaiKeySet) ?? true;
 
   const [isAdvancedSummarizationEnabled, setIsAdvancedSummarizationEnabled] =
     useState(false);
-  const [noteContent, setNoteContent] = useState("");
-  const [noteTitle, setNoteTitle] = useState("");
+  const [goalContent, setGoalContent] = useState("");
+  const [goalTitle, setGoalTitle] = useState("");
   const footerY = new Animated.Value(0);
   const toggleAdvancedSummarization = () => {
     setIsAdvancedSummarizationEnabled(!isAdvancedSummarizationEnabled);
@@ -69,13 +68,13 @@ export default function CreateNoteScreen({ navigation }) {
     outputRange: [0, 100], // Adjust this range according to the height of your footer
   });
 
-  const createUserNote = async () => {
-    await createNote({
-      title: noteTitle,
-      content: noteContent,
+  const createUserGoal = async () => {
+    await createGoal({
+      title: goalTitle,
+      content: goalContent,
       isSummary: isAdvancedSummarizationEnabled,
     });
-    navigation.navigate("NotesDashboardScreen");
+    navigation.navigate("GoalsDashboardScreen");
   };
 
   return (
@@ -95,7 +94,7 @@ export default function CreateNoteScreen({ navigation }) {
           />
         </TouchableOpacity>
 
-        <Text style={styles.title}>Create a New Note</Text>
+        <Text style={styles.title}>Create a New Goal</Text>
         <TouchableOpacity>
           <Image
             style={styles.arrowBack}
@@ -111,19 +110,19 @@ export default function CreateNoteScreen({ navigation }) {
         <View style={styles.inputContainer}>
           <Text style={styles.inputLabel}>Title</Text>
           <TextInput
-            value={noteTitle}
-            onChangeText={(val: string) => setNoteTitle(val)}
+            value={goalTitle}
+            onChangeText={(val: string) => setGoalTitle(val)}
             style={styles.inputField}
-            placeholder="Note Title"
+            placeholder="Goal Title"
             placeholderTextColor="#A9A9A9"
           />
           <Text style={styles.inputLabel}>Content</Text>
           <TextInput
-            value={noteContent}
-            onChangeText={(val: string) => setNoteContent(val)}
+            value={goalContent}
+            onChangeText={(val: string) => setGoalContent(val)}
             style={[styles.inputField, styles.inputFieldMulti]}
             multiline
-            placeholder="Note Comments"
+            placeholder="Goal Comments"
             placeholderTextColor="#A9A9A9"
           />
         </View>
@@ -163,13 +162,13 @@ export default function CreateNoteScreen({ navigation }) {
       </KeyboardAwareScrollView>
       <Animated.View
         style={[
-          styles.newNoteButtonContainer,
+          styles.newGoalButtonContainer,
           { transform: [{ translateY: footerTranslateY }] },
         ]}
       >
-        <TouchableOpacity onPress={createUserNote} style={styles.newNoteButton}>
+        <TouchableOpacity onPress={createUserGoal} style={styles.newGoalButton}>
           <AntDesign name="pluscircle" size={20} color="#fff" />
-          <Text style={styles.newNoteButtonText}>Create a New Note</Text>
+          <Text style={styles.newGoalButtonText}>Create a New Goal</Text>
         </TouchableOpacity>
       </Animated.View>
     </View>
@@ -283,7 +282,7 @@ const styles = StyleSheet.create({
     color: "#A9A9A9",
     paddingHorizontal: 30,
   },
-  newNoteButton: {
+  newGoalButton: {
     flexDirection: "row",
     backgroundColor: "#0D87E1",
     borderRadius: 7,
@@ -303,13 +302,13 @@ const styles = StyleSheet.create({
     shadowRadius: 4.65,
     elevation: 6,
   },
-  newNoteButtonText: {
+  newGoalButtonText: {
     color: "white",
     fontSize: RFValue(15),
     fontFamily: "MMedium",
     marginLeft: 10,
   },
-  newNoteButtonContainer: {
+  newGoalButtonContainer: {
     position: "absolute",
     bottom: 0,
     alignSelf: "center",

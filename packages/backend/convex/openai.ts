@@ -1,7 +1,7 @@
-import OpenAI from "openai";
-import { internalAction, internalMutation, query } from "./_generated/server";
 import { v } from "convex/values";
+import OpenAI from "openai";
 import { internal } from "./_generated/api";
+import { internalAction, internalMutation, query } from "./_generated/server";
 import { missingEnvVariableUrl } from "./utils";
 
 export const openaiKeySet = query({
@@ -13,12 +13,12 @@ export const openaiKeySet = query({
 
 export const summary = internalAction({
   args: {
-    id: v.id("notes"),
+    id: v.id("goals"),
     title: v.string(),
     content: v.string(),
   },
   handler: async (ctx, { id, title, content }) => {
-    const prompt = `Take in the following note and return a summary: Title: ${title}, Note content: ${content}`;
+    const prompt = `Take in the following goal and return a summary: Title: ${title}, Goal content: ${content}`;
 
     const apiKey = process.env.OPENAI_API_KEY;
     if (!apiKey) {
@@ -64,7 +64,7 @@ export const summary = internalAction({
 
 export const saveSummary = internalMutation({
   args: {
-    id: v.id("notes"),
+    id: v.id("goals"),
     summary: v.string(),
   },
   handler: async (ctx, { id, summary }) => {

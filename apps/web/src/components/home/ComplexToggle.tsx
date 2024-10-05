@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { Switch } from "@headlessui/react";
 
 function classNames(...classes: string[]) {
@@ -20,7 +19,7 @@ export default function ComplexToggle({
             !isSummary ? "font-bold" : "font-medium"
           }`}
         >
-          Original Note
+          Original Goal
         </span>{" "}
       </Switch.Label>
       <Switch

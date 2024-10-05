@@ -4,27 +4,27 @@ import { api } from "@packages/backend/convex/_generated/api";
 import { useMutation, useQuery } from "convex/react";
 import Image from "next/image";
 import { useState } from "react";
-import CreateNote from "./CreateNote";
-import NoteItem from "./NoteItem";
+import CreateGoal from "./CreateGoal";
+import GoalItem from "./Goaltem";
 
-const Notes = () => {
+const Goals = () => {
   const [search, setSearch] = useState("");
 
-  const allNotes = useQuery(api.notes.getNotes);
-  const deleteNote = useMutation(api.notes.deleteNote);
+  const allGoals = useQuery(api.goals.getGoals);
+  const deleteGoal = useMutation(api.goals.deleteGoal);
 
-  const finalNotes = search
-    ? allNotes?.filter(
-        (note) =>
-          note.title.toLowerCase().includes(search.toLowerCase()) ||
-          note.content.toLowerCase().includes(search.toLowerCase()),
+  const finalGoals = search
+    ? allGoals?.filter(
+        (goal) =>
+          goal.title.toLowerCase().includes(search.toLowerCase()) ||
+          goal.content.toLowerCase().includes(search.toLowerCase()),
       )
-    : allNotes;
+    : allGoals;
 
   return (
     <div className="container pb-10">
       <h1 className="text-[#2D2D2D] text-center text-[20px] sm:text-[43px] not-italic font-normal sm:font-medium leading-[114.3%] tracking-[-1.075px] sm:mt-8 my-4  sm:mb-10">
-        Your Notes
+        Your Goals
       </h1>
       <div className="px-5 sm:px-0">
         <div className="bg-white flex items-center h-[39px] sm:h-[55px] rounded border border-solid gap-2 sm:gap-5 mb-10 border-[rgba(0,0,0,0.40)] px-3 sm:px-11">
@@ -46,15 +46,15 @@ const Notes = () => {
       </div>
 
       <div className="border-[0.5px] mb-20 divide-y-[0.5px] divide-[#00000096] border-[#00000096]">
-        {finalNotes &&
-          finalNotes.map((note, index) => (
-            <NoteItem key={index} note={note} deleteNote={deleteNote} />
+        {finalGoals &&
+          finalGoals.map((goal, index) => (
+            <GoalItem key={index} goal={goal} deleteGoal={deleteGoal} />
           ))}
       </div>
 
-      <CreateNote />
+      <CreateGoal />
     </div>
   );
 };
 
-export default Notes;
+export default Goals;

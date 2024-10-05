@@ -1,10 +1,10 @@
-import React from "react";
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import React from "react";
+import CreateGoalScreen from "../screens/CreateGoalScreen";
+import GoalsDashboardScreen from "../screens/GoalsDashboardScreen";
+import InsideGoalScreen from "../screens/InsideGoalScreen";
 import LoginScreen from "../screens/LoginScreen";
-import NotesDashboardScreen from "../screens/NotesDashboardScreen";
-import InsideNoteScreen from "../screens/InsideNoteScreen";
-import CreateNoteScreen from "../screens/CreateNoteScreen";
 
 const Stack = createNativeStackNavigator();
 
@@ -17,11 +17,11 @@ const Navigation = () => {
       >
         <Stack.Screen name="LoginScreen" component={LoginScreen} />
         <Stack.Screen
-          name="NotesDashboardScreen"
-          component={NotesDashboardScreen}
+          name="GoalsDashboardScreen"
+          component={GoalsDashboardScreen}
         />
-        <Stack.Screen name="InsideNoteScreen" component={InsideNoteScreen} />
-        <Stack.Screen name="CreateNoteScreen" component={CreateNoteScreen} />
+        <Stack.Screen name="InsideGoalScreen" component={InsideGoalScreen} />
+        <Stack.Screen name="CreateGoalScreen" component={CreateGoalScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );

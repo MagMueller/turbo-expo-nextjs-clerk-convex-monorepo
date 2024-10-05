@@ -5,7 +5,6 @@ import { api } from "@packages/backend/convex/_generated/api";
 import { useMutation, useQuery } from "convex/react";
 import Image from "next/image";
 import { Fragment, useRef, useState } from "react";
-import Checkbox from "./Checkbox";
 
 export default function CreateGoal() {
   const [open, setOpen] = useState(false);
@@ -128,16 +127,9 @@ export default function CreateGoal() {
                                 onChange={(e) => setContent(e.target.value)}
                               />
                             </div>
-                            <p className="text-black text-[17px] sm:text-2xl not-italic font-medium leading-[90.3%] tracking-[-0.6px]">
-                              AI Features
-                            </p>
+                  
                           </div>
 
-                          <Checkbox
-                            openaiKeySet={openaiKeySet}
-                            isChecked={isChecked}
-                            checkHandler={() => setIsChecked(!isChecked)}
-                          />
                         </div>
                       </div>
                     </>

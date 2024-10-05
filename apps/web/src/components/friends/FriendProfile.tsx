@@ -32,6 +32,7 @@ const FriendProfile = () => {
           </div>
         ))}
       </div>
+
     </div>
   );
 };

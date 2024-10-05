@@ -88,7 +88,7 @@ const GoalItem = ({ goal, deleteGoal, updateGoal, updateVerifier, completeGoal }
           </div>
         )}
       </div>
-      <div className="relative">
+      <div className="relative flex flex-col items-center">
         <button
           ref={verifierRef}
           onClick={handleVerifierSelectToggle}
@@ -97,17 +97,9 @@ const GoalItem = ({ goal, deleteGoal, updateGoal, updateVerifier, completeGoal }
           <FaUserCheck className="text-blue-500 hover:text-blue-700" />
         </button>
         {isVerifierSelectOpen && (
-          <div className="absolute z-10 right-0 mt-2 bg-white border border-gray-300 rounded-md shadow-lg w-64">
-            <input
-              type="text"
-              placeholder="Search friends"
-              value={verifierSearch}
-              onChange={(e) => setVerifierSearch(e.target.value)}
-              className="w-full p-2 border-b border-gray-300"
-              onClick={(e) => e.stopPropagation()}
-            />
+          <div className="absolute z-10 top-full mt-2 bg-white border border-gray-300 rounded-md shadow-lg w-64">
             <ul className="max-h-40 overflow-y-auto">
-              {filteredFriends?.map((friend) => (
+              {friends?.map((friend) => (
                 <li
                   key={friend.friendId}
                   className="p-2 hover:bg-gray-100 cursor-pointer"

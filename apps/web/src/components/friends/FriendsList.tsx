@@ -82,6 +82,9 @@ const FriendsList = () => {
           </div>
         ))}
       </div>
+      <div className="mt-8 text-center">
+        <p className="text-lg font-semibold">Invite your friends and verify their goals</p>
+      </div>
 
       {searchUsers && searchUsers.length > 0 && (
         <div className="mb-6">

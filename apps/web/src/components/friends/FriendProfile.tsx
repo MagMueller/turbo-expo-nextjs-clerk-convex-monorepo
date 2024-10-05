@@ -9,8 +9,13 @@ const FriendProfile = () => {
 
   const friend = useQuery(api.users.getUser, { userId: friendId });
   const friendGoals = useQuery(api.goals.getFriendGoals, { friendId });
+  const friends = useQuery(api.friends.getFriends);
 
   if (!friend) return <div>Loading...</div>;
+
+  const isFriend = friends?.some(f => f.friendId === friendId && f.status === "accepted");
+
+  if (!isFriend) return <div>You are not friends with this user.</div>;
 
   return (
     <div className="container pb-10">

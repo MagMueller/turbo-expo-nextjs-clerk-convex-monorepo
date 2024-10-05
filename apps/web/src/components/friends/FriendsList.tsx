@@ -10,7 +10,6 @@ const FriendsList = () => {
   const searchUsers = useQuery(api.friends.searchUsers, { query: searchQuery });
   const addFriend = useMutation(api.friends.addFriend);
   const acceptFriendRequest = useMutation(api.friends.acceptFriendRequest);
-  const currentUser = useQuery(api.users.getCurrentUser);
   
   const handleAddFriend = async (friendId: string) => {
     try {
@@ -36,14 +35,37 @@ const FriendsList = () => {
         />
       </div>
 
-      {searchUsers && (
+      <div className="space-y-4 mb-8">
+        <h2 className="text-xl font-semibold mb-2">Your Friends</h2>
+        {friends?.map((friend) => (
+          <div key={friend._id} className="flex justify-between items-center p-4 bg-gray-100 rounded">
+            <Link href={`/friends/${friend.friendId}`}>
+              <span>{friend.friendName}</span>
+            </Link>
+            {friend.status === "accepted" && <span>{friend.friendEmail}</span>}
+            {friend.status === "pending" && (
+              <>
+                <span className="text-yellow-500">Pending</span>
+                {friend.friendId !== friend.userId && (
+                  <button
+                    onClick={() => acceptFriendRequest({ friendId: friend.friendId })}
+                    className="p-2 bg-green-500 text-white rounded"
+                  >
+                    Accept Request
+                  </button>
+                )}
+              </>
+            )}
+          </div>
+        ))}
+      </div>
+
+      {searchUsers && searchUsers.length > 0 && (
         <div className="mb-6">
-          <h2 className="text-xl font-semibold mb-2">Users</h2>
+          <h2 className="text-xl font-semibold mb-2">Other Users</h2>
           {searchUsers.map((user) => (
             <div key={user.userId} className="flex justify-between items-center p-2 bg-gray-100 rounded mb-2">
-              <Link href={`/friends/${user.userId}`}>
-                <span>{user.name}</span>
-              </Link>
+              <span>{user.name}</span>
               <button
                 onClick={() => handleAddFriend(user.userId)}
                 className="p-2 bg-blue-500 text-white rounded"
@@ -54,25 +76,6 @@ const FriendsList = () => {
           ))}
         </div>
       )}
-
-      <div className="space-y-4">
-        <h2 className="text-xl font-semibold mb-2">Your Friends</h2>
-        {friends?.map((friend) => (
-          <div key={friend._id} className="flex justify-between items-center p-4 bg-gray-100 rounded">
-            <Link href={`/friends/${friend.friendId}`}>
-              <span>{friend.friendName}</span>
-            </Link>
-            {friend.status === "pending" && (
-              <button
-                onClick={() => acceptFriendRequest({ friendId: friend.friendId })}
-                className="p-2 bg-green-500 text-white rounded"
-              >
-                Accept Request
-              </button>
-            )}
-          </div>
-        ))}
-      </div>
     </div>
   );
 };

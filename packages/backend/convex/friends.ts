@@ -10,16 +10,27 @@ export const getFriends = query({
 
     const friends = await ctx.db
       .query("friends")
-      .filter((q) => q.eq(q.field("userId"), userId))
+      .filter((q) => 
+        q.or(
+          q.eq(q.field("userId"), userId),
+          q.eq(q.field("friendId"), userId)
+        )
+      )
       .collect();
 
     const friendsWithDetails = await Promise.all(
       friends.map(async (friend) => {
+        const friendId = friend.userId === userId ? friend.friendId : friend.userId;
         const friendUser = await ctx.db
           .query("users")
-          .filter((q) => q.eq(q.field("userId"), friend.friendId))
+          .filter((q) => q.eq(q.field("userId"), friendId))
           .first();
-        return { ...friend, friendName: friendUser?.name || "Unknown" };
+        return { 
+          ...friend, 
+          friendId,
+          friendName: friendUser?.name || "Unknown",
+          friendEmail: friend.status === "accepted" ? friendUser?.email : null
+        };
       })
     );
 
@@ -33,16 +44,30 @@ export const searchUsers = query({
     const currentUserId = await getUserId(ctx);
     if (!currentUserId) return [];
 
-    const users = await ctx.db
+    const allUsers = await ctx.db
       .query("users")
       .filter((q) => q.neq(q.field("userId"), currentUserId))
       .collect();
 
+    const friends = await ctx.db
+      .query("friends")
+      .filter((q) => 
+        q.or(
+          q.eq(q.field("userId"), currentUserId),
+          q.eq(q.field("friendId"), currentUserId)
+        )
+      )
+      .collect();
+
+    const friendIds = new Set(friends.map(f => f.userId === currentUserId ? f.friendId : f.userId));
+
+    const filteredUsers = allUsers.filter(user => !friendIds.has(user.userId));
+
     if (query.trim() === "") {
-      return users;
+      return filteredUsers;
     }
 
-    return users.filter(
+    return filteredUsers.filter(
       (user) =>
         user.name.toLowerCase().includes(query.toLowerCase()) ||
         user.email.toLowerCase().includes(query.toLowerCase())
@@ -79,15 +104,6 @@ export const acceptFriendRequest = mutation({
         )
       )
       .patch({ status: "accepted" });
-  },
-});
-
-// Add this mutation
-export const updateVerifier = mutation({
-  args: { id: v.id("goals"), verifierId: v.string() },
-  handler: async (ctx, args) => {
-    const { id, verifierId } = args;
-    await ctx.db.patch(id, { verifierId });
   },
 });
 

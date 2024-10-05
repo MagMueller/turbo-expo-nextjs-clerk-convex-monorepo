@@ -1,9 +1,10 @@
 "use client";
 
-import { ReactNode } from "react";
-import { ConvexReactClient } from "convex/react";
+import { ClerkProvider, useAuth, useUser } from "@clerk/clerk-react";
+import { api } from "@packages/backend/convex/_generated/api";
+import { ConvexReactClient, useMutation } from "convex/react";
 import { ConvexProviderWithClerk } from "convex/react-clerk";
-import { ClerkProvider, useAuth } from "@clerk/clerk-react";
+import { ReactNode, useEffect } from "react";
 import { ErrorBoundary } from "./ErrorBoundary";
 
 const convex = new ConvexReactClient(process.env.NEXT_PUBLIC_CONVEX_URL!);
@@ -14,15 +15,27 @@ export default function ConvexClientProvider({
   children: ReactNode;
 }) {
   return (
-    // NOTE: Once you get Clerk working you can remove this error boundary
     <ErrorBoundary>
       <ClerkProvider
         publishableKey={process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY!}
       >
         <ConvexProviderWithClerk client={convex} useAuth={useAuth}>
-          {children}
+          <UserInitializer>{children}</UserInitializer>
         </ConvexProviderWithClerk>
       </ClerkProvider>
     </ErrorBoundary>
   );
+}
+
+function UserInitializer({ children }: { children: ReactNode }) {
+  const { user } = useUser();
+  const createOrUpdateUser = useMutation(api.users.createOrUpdateUser);
+
+  useEffect(() => {
+    if (user) {
+      createOrUpdateUser({ name: user.fullName || "", email: user.primaryEmailAddress?.emailAddress || "" });
+    }
+  }, [user, createOrUpdateUser]);
+
+  return <>{children}</>;
 }

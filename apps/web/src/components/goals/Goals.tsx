@@ -2,7 +2,7 @@
 
 import { api } from "@packages/backend/convex/_generated/api";
 import { useMutation, useQuery } from "convex/react";
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import DatePicker from "./DatePicker";
 import GoalItem from "./Goaltem";
 
@@ -22,6 +22,7 @@ const Goals: React.FC = () => {
   const [newGoalTitle, setNewGoalTitle] = useState("");
   const [newGoalDeadline, setNewGoalDeadline] = useState("");
   const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);
+  const newGoalInputRef = useRef<HTMLInputElement>(null);
 
   const allGoals = useQuery(api.goals.getGoals);
   const deleteGoal = useMutation(api.goals.deleteGoal);
@@ -29,6 +30,20 @@ const Goals: React.FC = () => {
   const updateGoal = useMutation(api.goals.updateGoal);
   const updateVerifier = useMutation(api.goals.updateVerifier);
   const completeGoal = useMutation(api.goals.completeGoal);
+
+  useEffect(() => {
+    if (newGoalInputRef.current) {
+      newGoalInputRef.current.focus();
+    }
+  }, []);
+
+  const handleInputBlur = () => {
+    setTimeout(() => {
+      if (newGoalInputRef.current) {
+        newGoalInputRef.current.focus();
+      }
+    }, 0);
+  };
 
   const handleCreateGoal = async () => {
     if (newGoalTitle.trim() !== '') {
@@ -60,11 +75,13 @@ const Goals: React.FC = () => {
       <div className="px-5 sm:px-0 mb-6">
         <div className="bg-white flex items-center h-[39px] sm:h-[55px] rounded border border-solid gap-2 sm:gap-5 border-[rgba(0,0,0,0.40)] px-3 sm:px-11">
           <input
+            ref={newGoalInputRef}
             type="text"
             placeholder="Type a new goal and press Enter"
             value={newGoalTitle}
             onChange={(e) => setNewGoalTitle(e.target.value)}
             onKeyPress={(e) => e.key === 'Enter' && handleCreateGoal()}
+            onBlur={handleInputBlur}
             className="flex-1 text-[#2D2D2D] text-[17px] sm:text-2xl not-italic font-light leading-[114.3%] tracking-[-0.6px] focus:outline-0 focus:ring-0 focus:border-0 border-0"
           />
           <button

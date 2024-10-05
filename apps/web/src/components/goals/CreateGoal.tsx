@@ -1,7 +1,5 @@
 "use client";
 
-import Checkbox from "@components/Checkbox";
-import DatePicker from "@components/DatePicker";
 import { Dialog, Transition } from "@headlessui/react";
 import { api } from "@packages/backend/convex/_generated/api";
 import { useMutation, useQuery } from "convex/react";
@@ -15,13 +13,19 @@ export default function CreateGoal() {
   const [isChecked, setIsChecked] = useState<boolean>(false);
   const [verifierId, setVerifierId] = useState("");
   const [newGoalDeadline, setNewGoalDeadline] = useState("");
-  
+  const [verifierSearch, setVerifierSearch] = useState("");
+  const [isVerifierSelectOpen, setIsVerifierSelectOpen] = useState(false);
 
   const cancelButtonRef = useRef(null);
 
   const createGoal = useMutation(api.goals.createGoal);
   const openaiKeySet = useQuery(api.openai.openaiKeySet) ?? true;
   const friends = useQuery(api.friends.getFriends);
+
+  const filteredFriends = friends?.filter(friend => 
+    friend.friendName.toLowerCase().includes(verifierSearch.toLowerCase()) ||
+    friend.friendEmail.toLowerCase().includes(verifierSearch.toLowerCase())
+  );
 
   const createUserGoal = async () => {
     await createGoal({
@@ -32,6 +36,10 @@ export default function CreateGoal() {
       verifierId: verifierId || undefined,
     });
     setOpen(false);
+  };
+
+  const handleVerifierSelectToggle = () => {
+    setIsVerifierSelectOpen(!isVerifierSelectOpen);
   };
 
   return (
@@ -85,98 +93,84 @@ export default function CreateGoal() {
                 leaveFrom="opacity-100 translate-y-0 sm:scale-100"
                 leaveTo="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
               >
-                <Dialog.Panel className="relative transform overflow-hidden rounded-[10px] bg-white text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-[719px]">
-                  <div className="bg-white px-4 pb-4 pt-5 sm:p-8 sm:pb-4">
-                    <>
-                      <div className="mt-3  sm:mt-0 text-left">
-                        <Dialog.Title
-                          as="h3"
-                          className="text-black text-center text-xl sm:text-left sm:text-[35px] pb-6 sm:pb-8 not-italic font-semibold leading-[90.3%] tracking-[-0.875px]"
-                        >
+                <Dialog.Panel className="relative transform overflow-hidden rounded-lg bg-white text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg">
+                  <div className="bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
+                    <div className="sm:flex sm:items-start">
+                      <div className="mt-3 text-center sm:ml-4 sm:mt-0 sm:text-left">
+                        <Dialog.Title as="h3" className="text-base font-semibold leading-6 text-gray-900">
                           Create New Goal
                         </Dialog.Title>
-                        <div className="mt-2 space-y-3">
-                          <div className="pb-2">
-                            <label
-                              htmlFor="title"
-                              className=" text-black text-[17px] sm:text-2xl not-italic font-medium leading-[90.3%] tracking-[-0.6px]"
-                            >
-                              Title
-                            </label>
-                            <div className="mt-2">
+                        <div className="mt-2">
+                          <input
+                            type="text"
+                            placeholder="Goal Title"
+                            value={title}
+                            onChange={(e) => setTitle(e.target.value)}
+                            className="w-full p-2 border rounded"
+                          />
+                          <textarea
+                            placeholder="Goal Description"
+                            value={content}
+                            onChange={(e) => setContent(e.target.value)}
+                            className="w-full p-2 border rounded mt-2"
+                          />
+                          <div className="mt-2">
+                            <label className="inline-flex items-center">
                               <input
-                                id="title"
-                                name="title"
-                                type="text"
-                                placeholder="Goal Title"
-                                autoComplete="title"
-                                value={title}
-                                onChange={(e) => setTitle(e.target.value)}
-                                className="border shadow-[0px_1px_2px_0px_rgba(16,24,40,0.05)] rounded-lg border-solid border-[#D0D5DD] bg-white w-full py-2.5 px-[14px] text-black text-[17px] not-italic font-light leading-[90.3%] tracking-[-0.425px] sm:text-2xl"
+                                type="checkbox"
+                                checked={isChecked}
+                                onChange={(e) => setIsChecked(e.target.checked)}
+                                className="form-checkbox"
                               />
-                            </div>
-                          </div>
-
-                          <div className="">
-                            <label
-                              htmlFor="description"
-                              className=" text-black text-[17px] sm:text-2xl not-italic font-medium leading-[90.3%] tracking-[-0.6px]"
-                            >
-                              The Goal
+                              <span className="ml-2">Generate Summary</span>
                             </label>
-                            <div className="mt-2 pb-[18px]">
-                              <textarea
-                                id="description"
-                                name="description"
-                                rows={8}
-                                placeholder="Start your goal "
-                                className="block w-full rounded-md border-0 py-1.5  border-[#D0D5DD] text-2xl shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600  sm:leading-6 text-black text-[17px] not-italic font-light leading-[90.3%] tracking-[-0.425px] sm:text-2xl"
-                                value={content}
-                                onChange={(e) => setContent(e.target.value)}
-                              />
-                            </div>
                           </div>
-
-                          <div className="mt-4">
-                            <label htmlFor="verifier" className="block text-sm font-medium text-gray-700">
-                              Verifier
-                            </label>
-                            <select
-                              id="verifier"
-                              name="verifier"
-                              value={verifierId}
-                              onChange={(e) => setVerifierId(e.target.value)}
-                              className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md"
-                            >
-                              <option value="">Select a verifier</option>
-                              {friends?.map((friend) => (
-                                <option key={friend.friendId} value={friend.friendId}>
-                                  {friend.friendId}
-                                </option>
-                              ))}
-                            </select>
-                          </div>
-
-                          <div className="mt-4">
-                            <label htmlFor="deadline" className="block text-sm font-medium text-gray-700">
-                              Deadline
-                            </label>
-                            <DatePicker
+                          <div className="mt-2">
+                            <input
+                              type="date"
                               value={newGoalDeadline}
-                              onChange={(value) => setNewGoalDeadline(value)}
+                              onChange={(e) => setNewGoalDeadline(e.target.value)}
+                              className="w-full p-2 border rounded"
                             />
                           </div>
-
-                          <div className="mt-4">
-                            <Checkbox
-                              isChecked={isChecked}
-                              checkHandler={() => setIsChecked(!isChecked)}
-                              openaiKeySet={openaiKeySet}
-                            />
+                          <div className="mt-2 relative">
+                            <button
+                              type="button"
+                              onClick={handleVerifierSelectToggle}
+                              className="w-full p-2 border rounded text-left"
+                            >
+                              {verifierId ? "Change Verifier" : "Set Verifier"}
+                            </button>
+                            {isVerifierSelectOpen && (
+                              <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg">
+                                <input
+                                  type="text"
+                                  placeholder="Search friends"
+                                  value={verifierSearch}
+                                  onChange={(e) => setVerifierSearch(e.target.value)}
+                                  className="w-full p-2 border-b border-gray-300"
+                                  onClick={(e) => e.stopPropagation()}
+                                />
+                                <ul className="max-h-40 overflow-y-auto">
+                                  {filteredFriends?.map((friend) => (
+                                    <li
+                                      key={friend.friendId}
+                                      className="p-2 hover:bg-gray-100 cursor-pointer"
+                                      onClick={() => {
+                                        setVerifierId(friend.friendId);
+                                        setIsVerifierSelectOpen(false);
+                                      }}
+                                    >
+                                      {friend.friendName} ({friend.friendEmail})
+                                    </li>
+                                  ))}
+                                </ul>
+                              </div>
+                            )}
                           </div>
                         </div>
                       </div>
-                    </>
+                    </div>
                   </div>
                   <div className="bg-gray-50 px-4 py-3 sm:flex sm:flex-row-reverse sm:px-6">
                     <button

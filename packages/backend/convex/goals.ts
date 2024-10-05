@@ -54,7 +54,7 @@ export const createGoal = mutation({
       content, 
       deadline, 
       verifierId,
-      status: "pending"
+      status: "unfinished"
     });
 
     if (isSummary) {
@@ -92,7 +92,11 @@ export const completeGoal = mutation({
   args: { id: v.id("goals") },
   handler: async (ctx, args) => {
     const { id } = args;
-    await ctx.db.patch(id, { status: "passed" });
+    const goal = await ctx.db.get(id);
+    if (!goal) throw new Error("Goal not found");
+
+    const newStatus = goal.verifierId ? "pending" : "completed";
+    await ctx.db.patch(id, { status: newStatus });
   },
 });
 
@@ -119,7 +123,14 @@ export const getGoalsToVerify = query({
 export const verifyGoal = mutation({
   args: { goalId: v.id("goals"), status: v.string() },
   handler: async (ctx, { goalId, status }) => {
-    await ctx.db.patch(goalId, { status });
+    const goal = await ctx.db.get(goalId);
+    if (!goal) throw new Error("Goal not found");
+
+    if (status === "passed") {
+      await ctx.db.patch(goalId, { status: "completed" });
+    } else {
+      await ctx.db.patch(goalId, { status: "unfinished" });
+    }
   },
 });
 
@@ -148,5 +159,13 @@ export const getFriendGoals = query({
       .collect();
 
     return goals;
+  },
+});
+
+export const updateVerifier = mutation({
+  args: { id: v.id("goals"), verifierId: v.string() },
+  handler: async (ctx, args) => {
+    const { id, verifierId } = args;
+    await ctx.db.patch(id, { verifierId });
   },
 });

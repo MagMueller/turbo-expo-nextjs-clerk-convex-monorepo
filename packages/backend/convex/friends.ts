@@ -174,3 +174,4 @@ export const rejectFriendRequest = mutation({
     await ctx.db.delete(friendRequest._id);
   },
 });
+

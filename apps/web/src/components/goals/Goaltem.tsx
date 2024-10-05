@@ -3,6 +3,7 @@ import { useQuery } from "convex/react";
 import Image from 'next/image';
 import Link from "next/link";
 import { useRef, useState } from "react";
+import { FaCheck, FaUserCheck } from 'react-icons/fa';
 import DatePicker from "./DatePicker";
 
 export interface GoalProps {
@@ -23,11 +24,17 @@ export interface GoalProps {
 const GoalItem = ({ goal, deleteGoal, updateGoal, updateVerifier, completeGoal }: GoalProps) => {
   const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);
   const [isVerifierSelectOpen, setIsVerifierSelectOpen] = useState(false);
-  const [datePickerPosition, setDatePickerPosition] = useState({ top: 0, left: 0 });
+  const [verifierSearch, setVerifierSearch] = useState("");
   const buttonRef = useRef<HTMLButtonElement>(null);
   const verifierRef = useRef<HTMLButtonElement>(null);
 
   const friends = useQuery(api.friends.getFriends);
+  const verifier = goal.verifierId ? useQuery(api.users.getUser, { userId: goal.verifierId }) : null;
+  
+  const filteredFriends = friends?.filter(friend => 
+    friend.friendName.toLowerCase().includes(verifierSearch.toLowerCase()) ||
+    friend.friendEmail.toLowerCase().includes(verifierSearch.toLowerCase())
+  );
 
   const daysUntilDeadline = goal.deadline
     ? Math.ceil((new Date(goal.deadline).getTime() - new Date().getTime()) / (1000 * 3600 * 24))
@@ -44,13 +51,6 @@ const GoalItem = ({ goal, deleteGoal, updateGoal, updateVerifier, completeGoal }
   };
 
   const handleDatePickerToggle = () => {
-    if (!isDatePickerOpen && buttonRef.current) {
-      const rect = buttonRef.current.getBoundingClientRect();
-      setDatePickerPosition({
-        top: rect.bottom + window.scrollY + 10,
-        left: rect.left + window.scrollX - 100,
-      });
-    }
     setIsDatePickerOpen(!isDatePickerOpen);
   };
 
@@ -94,36 +94,47 @@ const GoalItem = ({ goal, deleteGoal, updateGoal, updateVerifier, completeGoal }
           onClick={handleVerifierSelectToggle}
           className="text-[#2D2D2D] text-center text-xl font-medium leading-[114.3%] tracking-[-0.5px]"
         >
-          {goal.verifierId ? "Change Verifier" : "Set Verifier"}
+          <FaUserCheck className="text-blue-500 hover:text-blue-700" />
         </button>
         {isVerifierSelectOpen && (
-          <div className="absolute z-10 right-0 mt-2 bg-white border border-gray-300 rounded-md shadow-lg">
-            <select
-              value={goal.verifierId || ""}
-              onChange={(e) => handleVerifierChange(e.target.value)}
-              className="block w-full px-4 py-2 text-sm"
-            >
-              <option value="">Select a verifier</option>
-              {friends?.map((friend) => (
-                <option key={friend.friendId} value={friend.friendId}>
-                  {friend.friendId}
-                </option>
+          <div className="absolute z-10 right-0 mt-2 bg-white border border-gray-300 rounded-md shadow-lg w-64">
+            <input
+              type="text"
+              placeholder="Search friends"
+              value={verifierSearch}
+              onChange={(e) => setVerifierSearch(e.target.value)}
+              className="w-full p-2 border-b border-gray-300"
+              onClick={(e) => e.stopPropagation()}
+            />
+            <ul className="max-h-40 overflow-y-auto">
+              {filteredFriends?.map((friend) => (
+                <li
+                  key={friend.friendId}
+                  className="p-2 hover:bg-gray-100 cursor-pointer"
+                  onClick={() => handleVerifierChange(friend.friendId)}
+                >
+                  {friend.friendName} ({friend.friendEmail})
+                </li>
               ))}
-            </select>
+            </ul>
+          </div>
+        )}
+        {verifier && (
+          <div className="text-sm text-gray-500 mt-1">
+            {verifier.name}
           </div>
         )}
       </div>
       <div className="text-[#2D2D2D] text-center text-xl font-medium leading-[114.3%] tracking-[-0.5px]">
         {goal.status || "pending"}
       </div>
-      {!goal.verifierId && (
-        <button
-          onClick={() => completeGoal(goal._id)}
-          className="p-2 bg-green-500 text-white rounded text-xl font-medium"
-        >
-          Complete
-        </button>
-      )}
+      <button
+        onClick={() => completeGoal(goal._id)}
+        className="mr-2"
+        title="Mark as Completed"
+      >
+        <FaCheck className="text-green-500 hover:text-green-700" />
+      </button>
       <Image
         src="/images/delete.svg"
         width={20}

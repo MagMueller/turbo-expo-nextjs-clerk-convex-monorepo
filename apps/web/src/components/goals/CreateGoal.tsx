@@ -1,5 +1,7 @@
 "use client";
 
+import Checkbox from "@components/Checkbox";
+import DatePicker from "@components/DatePicker";
 import { Dialog, Transition } from "@headlessui/react";
 import { api } from "@packages/backend/convex/_generated/api";
 import { useMutation, useQuery } from "convex/react";
@@ -11,17 +13,23 @@ export default function CreateGoal() {
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const [isChecked, setIsChecked] = useState<boolean>(false);
+  const [verifierId, setVerifierId] = useState("");
+  const [newGoalDeadline, setNewGoalDeadline] = useState("");
+  
 
   const cancelButtonRef = useRef(null);
 
   const createGoal = useMutation(api.goals.createGoal);
   const openaiKeySet = useQuery(api.openai.openaiKeySet) ?? true;
+  const friends = useQuery(api.friends.getFriends);
 
   const createUserGoal = async () => {
     await createGoal({
       title,
       content,
       isSummary: isChecked,
+      deadline: newGoalDeadline || undefined,
+      verifierId: verifierId || undefined,
     });
     setOpen(false);
   };
@@ -127,20 +135,64 @@ export default function CreateGoal() {
                                 onChange={(e) => setContent(e.target.value)}
                               />
                             </div>
-                  
                           </div>
 
+                          <div className="mt-4">
+                            <label htmlFor="verifier" className="block text-sm font-medium text-gray-700">
+                              Verifier
+                            </label>
+                            <select
+                              id="verifier"
+                              name="verifier"
+                              value={verifierId}
+                              onChange={(e) => setVerifierId(e.target.value)}
+                              className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md"
+                            >
+                              <option value="">Select a verifier</option>
+                              {friends?.map((friend) => (
+                                <option key={friend.friendId} value={friend.friendId}>
+                                  {friend.friendId}
+                                </option>
+                              ))}
+                            </select>
+                          </div>
+
+                          <div className="mt-4">
+                            <label htmlFor="deadline" className="block text-sm font-medium text-gray-700">
+                              Deadline
+                            </label>
+                            <DatePicker
+                              value={newGoalDeadline}
+                              onChange={(value) => setNewGoalDeadline(value)}
+                            />
+                          </div>
+
+                          <div className="mt-4">
+                            <Checkbox
+                              isChecked={isChecked}
+                              checkHandler={() => setIsChecked(!isChecked)}
+                              openaiKeySet={openaiKeySet}
+                            />
+                          </div>
                         </div>
                       </div>
                     </>
                   </div>
-                  <div className=" px-4 py-3 mb-5 flex justify-center items-center">
+                  <div className="bg-gray-50 px-4 py-3 sm:flex sm:flex-row-reverse sm:px-6">
                     <button
                       type="button"
-                      className="button text-white text-center text-[17px] sm:text-2xl not-italic font-semibold leading-[90.3%] tracking-[-0.6px] px-[70px] py-2"
+                      className="inline-flex w-full justify-center rounded-md bg-blue-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-500 sm:ml-3 sm:w-auto"
                       onClick={createUserGoal}
                     >
                       Create
+                    </button>
+                    <button
+                      type="button"
+                      className="mt-3 inline-flex w-full justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 sm:mt-0 sm:w-auto"
+                      onClick={() => setOpen(false)}
+                      ref={cancelButtonRef}
+                    >
+                      Cancel
                     </button>
                   </div>
                 </Dialog.Panel>

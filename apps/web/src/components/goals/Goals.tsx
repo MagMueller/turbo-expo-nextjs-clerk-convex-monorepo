@@ -6,6 +6,17 @@ import React, { useState } from 'react';
 import DatePicker from "./DatePicker";
 import GoalItem from "./Goaltem";
 
+export interface GoalProps {
+  goal: {
+    title: string;
+    _id: string;
+    _creationTime: number;
+    deadline?: string;
+  };
+  deleteGoal: any;
+  updateGoal: (id: string, deadline: string) => void;
+}
+
 const Goals: React.FC = () => {
   const [search, setSearch] = useState("");
   const [newGoalTitle, setNewGoalTitle] = useState("");
@@ -16,6 +27,8 @@ const Goals: React.FC = () => {
   const deleteGoal = useMutation(api.goals.deleteGoal);
   const createGoal = useMutation(api.goals.createGoal);
   const updateGoal = useMutation(api.goals.updateGoal);
+  const updateVerifier = useMutation(api.goals.updateVerifier);
+  const completeGoal = useMutation(api.goals.completeGoal);
 
   const handleCreateGoal = async () => {
     if (newGoalTitle.trim() !== '') {
@@ -85,7 +98,7 @@ const Goals: React.FC = () => {
       <div className="border-[0.5px] mb-20 divide-y-[0.5px] divide-[#00000096] border-[#00000096]">
         {finalGoals &&
           finalGoals.map((goal, index) => (
-            <GoalItem key={index} goal={goal} deleteGoal={deleteGoal} updateGoal={(id, deadline) => updateGoal({ id, deadline })} />
+            <GoalItem key={index} goal={goal} deleteGoal={deleteGoal} updateGoal={(id, deadline) => updateGoal({ id, deadline })} updateVerifier={(id, verifierId) => updateVerifier({ id, verifierId })} completeGoal={(id) => completeGoal({ id })} />
           ))}
       </div>
     </div>

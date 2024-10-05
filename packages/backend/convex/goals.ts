@@ -43,11 +43,19 @@ export const createGoal = mutation({
     content: v.string(),
     isSummary: v.boolean(),
     deadline: v.optional(v.string()),
+    verifierId: v.optional(v.string()),
   },
-  handler: async (ctx, { title, content, isSummary, deadline }) => {
+  handler: async (ctx, { title, content, isSummary, deadline, verifierId }) => {
     const userId = await getUserId(ctx);
     if (!userId) throw new Error("User not found");
-    const goalId = await ctx.db.insert("goals", { userId, title, content, deadline });
+    const goalId = await ctx.db.insert("goals", { 
+      userId, 
+      title, 
+      content, 
+      deadline, 
+      verifierId,
+      status: "pending"
+    });
 
     if (isSummary) {
       await ctx.scheduler.runAfter(0, internal.openai.summary, {
@@ -75,5 +83,42 @@ export const updateGoal = mutation({
   handler: async (ctx, args) => {
     const { id, deadline } = args;
     await ctx.db.patch(id, { deadline });
+  },
+});
+
+// Add these new mutations and queries
+
+export const completeGoal = mutation({
+  args: { id: v.id("goals") },
+  handler: async (ctx, args) => {
+    const { id } = args;
+    await ctx.db.patch(id, { status: "passed" });
+  },
+});
+
+export const getGoalsToVerify = query({
+  args: {},
+  handler: async (ctx) => {
+    const userId = await getUserId(ctx);
+    if (!userId) return null;
+
+    const goalsToVerify = await ctx.db
+      .query("goals")
+      .filter((q) => 
+        q.and(
+          q.eq(q.field("verifierId"), userId),
+          q.eq(q.field("status"), "pending")
+        )
+      )
+      .collect();
+
+    return goalsToVerify;
+  },
+});
+
+export const verifyGoal = mutation({
+  args: { goalId: v.id("goals"), status: v.string() },
+  handler: async (ctx, { goalId, status }) => {
+    await ctx.db.patch(goalId, { status });
   },
 });

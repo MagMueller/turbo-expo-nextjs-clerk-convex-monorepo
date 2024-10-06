@@ -138,7 +138,7 @@ const Goals: React.FC = () => {
         <div className="relative">
           <button
             onClick={() => setIsDatePickerOpen(!isDatePickerOpen)}
-            className="p-3 bg-black text-white rounded hover:bg-gray-800 text-lg"
+            className="p-3 bg-gray-500 text-white rounded hover:bg-gray-800 text-lg"
           >
             <FaCalendarAlt className="text-xl" />
           </button>
@@ -158,7 +158,7 @@ const Goals: React.FC = () => {
         <div className="relative">
           <button
             onClick={() => setIsVerifierSelectOpen(!isVerifierSelectOpen)}
-            className="p-3 bg-pink-500 text-white rounded hover:bg-pink-600 text-lg"
+            className="p-3 bg-pink-400 text-white rounded hover:bg-pink-800 text-lg"
           >
             <FaUserCheck className="text-xl" />
           </button>

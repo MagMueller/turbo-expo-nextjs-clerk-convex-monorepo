@@ -39,6 +39,7 @@ const GoalItem: React.FC<GoalProps> = ({ goal, onComplete, onNotAchieved }) => {
   };
 
   const isCompleted = goal.status === "completed" || goal.status === "failed";
+  const isPending = goal.status === "pending";
 
   return (
     <div className="bg-white rounded-lg shadow-md p-4 mb-4 transition duration-300 hover:shadow-lg">
@@ -57,7 +58,7 @@ const GoalItem: React.FC<GoalProps> = ({ goal, onComplete, onNotAchieved }) => {
             <FaWallet className="mr-1 text-green-400" />
             <span className="text-sm">Budget: {goal.budget || 0}</span>
           </span>
-          {!isCompleted && onComplete && onNotAchieved && (
+          {!isCompleted && !isPending && onComplete && onNotAchieved && (
             <div className="flex space-x-2">
               <button 
                 onClick={onComplete} 
@@ -74,6 +75,9 @@ const GoalItem: React.FC<GoalProps> = ({ goal, onComplete, onNotAchieved }) => {
                 <FaTimes className="text-xl" />
               </button>
             </div>
+          )}
+          {isPending && (
+            <span className="text-yellow-500">Pending Verification</span>
           )}
         </div>
       </div>

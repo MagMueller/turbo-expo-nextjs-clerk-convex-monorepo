@@ -131,13 +131,20 @@ export const completeGoal = mutation({
 
     if (!user) throw new Error("User not found");
 
-    const newStatus = goal.verifierId ? "pending" : "completed";
-    await ctx.db.patch(id, { status: newStatus });
+    if (goal.verifierId) {
+      // If there's a verifier, set the status to pending
+      await ctx.db.patch(id, { status: "pending" });
+    } else {
+      // If there's no verifier, complete the goal immediately
+      await ctx.db.patch(id, { status: "completed" });
+      
+      // Update user's budget and score
+      const budgetIncrease = goal.budget;
+      const scoreIncrease = goal.budget; // 1x multiplier when no verifier
 
-    if (newStatus === "completed") {
       await ctx.db.patch(user._id, { 
-        budget: user.budget + goal.budget,
-        score: user.score + goal.budget * 2
+        budget: user.budget + budgetIncrease,
+        score: user.score + scoreIncrease
       });
     }
   },
@@ -178,23 +185,18 @@ export const verifyGoal = mutation({
 
     if (status === "passed") {
       await ctx.db.patch(goalId, { status: "completed" });
+      
+      // Update user's budget and score
+      const budgetIncrease = goal.budget;
+      const scoreIncrease = goal.budget * 2; // 2x multiplier when verified
+
       await ctx.db.patch(user._id, { 
-        budget: user.budget + goal.budget,
-        score: user.score + goal.budget * 2
+        budget: user.budget + budgetIncrease,
+        score: user.score + scoreIncrease
       });
     } else {
       await ctx.db.patch(goalId, { status: "failed" });
-      const verifier = await ctx.db
-        .query("users")
-        .filter((q) => q.eq(q.field("userId"), goal.verifierId))
-        .first();
-      if (verifier) {
-        const verifierReward = Math.floor(goal.budget * 0.5);
-        await ctx.db.patch(verifier._id, { 
-          budget: verifier.budget + verifierReward,
-          score: verifier.score + verifierReward
-        });
-      }
+      // Handle failed verification (e.g., no budget or score increase)
     }
   },
 });

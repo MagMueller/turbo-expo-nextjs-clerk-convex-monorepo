@@ -104,6 +104,14 @@ const Goals: React.FC = () => {
     await addBudget();
   };
 
+  const handleCompleteGoal = (goalId: string) => {
+    completeGoal({ id: goalId });
+  };
+
+  const handleNotAchievedGoal = (goalId: string) => {
+    setGoalNotAchieved({ id: goalId });
+  };
+
   return (
     <div className="container mx-auto px-4 py-8">
       <h1 className="text-4xl font-bold mb-8 text-gray-800">Goals</h1>
@@ -197,8 +205,18 @@ const Goals: React.FC = () => {
         <SortButton field="title" currentSort={sortBy} onSort={handleSort} icon={FaSort} />
       </div>
       
-      <GoalSection title="Active" goals={unfinishedGoals} onComplete={completeGoal} onNotAchieved={setGoalNotAchieved} />
-      <GoalSection title="Pending" goals={pendingGoals} onComplete={completeGoal} onNotAchieved={setGoalNotAchieved} />
+      <GoalSection 
+        title="Active" 
+        goals={unfinishedGoals} 
+        onComplete={handleCompleteGoal} 
+        onNotAchieved={handleNotAchievedGoal} 
+      />
+      <GoalSection 
+        title="Pending" 
+        goals={pendingGoals} 
+        onComplete={handleCompleteGoal} 
+        onNotAchieved={handleNotAchievedGoal} 
+      />
       <GoalSection title="Achieved" goals={achievedGoals} />
       <GoalSection title="Failed" goals={notAchievedGoals} />
 

@@ -1,6 +1,5 @@
 import { Auth } from "convex/server";
 import { v } from "convex/values";
-import { internal } from "./_generated/api";
 import { mutation, query } from "./_generated/server";
 
 export const getUserId = async (ctx: { auth: Auth }) => {
@@ -8,17 +7,22 @@ export const getUserId = async (ctx: { auth: Auth }) => {
 };
 
 export const getGoals = query({
-  args: {},
   handler: async (ctx) => {
     const userId = await getUserId(ctx);
-    if (!userId) return null;
+    if (!userId) return [];
 
-    const goals = await ctx.db
-      .query("goals")
-      .filter((q) => q.eq(q.field("userId"), userId))
-      .collect();
+    try {
+      const goalsQuery = ctx.db
+        .query("goals")
+        .filter((q) => q.eq(q.field("userId"), userId));
 
-    return goals;
+      const goals = await goalsQuery.collect();
+      console.log("Goals fetched from database:", goals);
+      return goals;
+    } catch (error) {
+      console.error("Error fetching goals:", error);
+      return [];
+    }
   },
 });
 
@@ -38,46 +42,34 @@ export const createGoal = mutation({
   args: {
     title: v.string(),
     content: v.string(),
-    isSummary: v.boolean(),
     deadline: v.optional(v.string()),
     verifierId: v.optional(v.string()),
     budget: v.number(),
   },
-  handler: async (ctx, { title, content, isSummary, deadline, verifierId, budget }) => {
+  handler: async (ctx, args) => {
     const userId = await getUserId(ctx);
-    if (!userId) throw new Error("User not found");
+    if (!userId) throw new Error("Not authenticated");
 
     const user = await ctx.db
       .query("users")
       .filter((q) => q.eq(q.field("userId"), userId))
       .first();
-    
-    if (!user || (user.budget ?? 0) < budget) {
-      throw new Error("Not enough budget");
-    }
 
-    // Deduct budget from user
-    await ctx.db.patch(user._id, { budget: (user.budget ?? 0) - budget });
+    if (!user) throw new Error("User not found");
 
-    const goalId = await ctx.db.insert("goals", { 
-      userId, 
-      title, 
-      content, 
-      deadline,
-      verifierId,
-      status: "unfinished",
-      budget
+    if (user.budget < args.budget) throw new Error("Insufficient budget");
+
+    await ctx.db.patch(user._id, { budget: user.budget - args.budget });
+
+    const newGoal = await ctx.db.insert("goals", {
+      ...args,
+      userId,
+      status: "unfinished", // Ensure this is set correctly
+      createdAt: new Date().toISOString(),
     });
 
-    if (isSummary) {
-      await ctx.scheduler.runAfter(0, internal.openai.summary, {
-        id: goalId,
-        title,
-        content,
-      });
-    }
-
-    return goalId;
+    console.log("New goal created:", newGoal);
+    return newGoal;
   },
 });
 
@@ -104,35 +96,37 @@ export const deleteGoal = mutation({
 });
 
 export const updateGoal = mutation({
-  args: { 
-    id: v.id("goals"), 
+  args: {
+    id: v.id("goals"),
+    title: v.optional(v.string()),
+    content: v.optional(v.string()),
     deadline: v.optional(v.string()),
-    budget: v.optional(v.number())
+    verifierId: v.optional(v.string()),
+    budget: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
-    const { id, deadline, budget } = args;
+    const { id, ...updates } = args;
     const goal = await ctx.db.get(id);
     if (!goal) throw new Error("Goal not found");
 
-    const updateFields: { deadline?: string; budget?: number } = {};
-    if (deadline !== undefined) updateFields.deadline = deadline;
-    if (budget !== undefined) {
+    const userId = await getUserId(ctx);
+    if (goal.userId !== userId) throw new Error("Not authorized");
+
+    if (updates.budget && updates.budget !== goal.budget) {
       const user = await ctx.db
         .query("users")
-        .filter((q) => q.eq(q.field("userId"), goal.userId))
+        .filter((q) => q.eq(q.field("userId"), userId))
         .first();
 
-      if (user) {
-        const budgetDiff = budget - (goal.budget ?? 0);
-        if ((user.budget ?? 0) < budgetDiff) {
-          throw new Error("Not enough budget");
-        }
-        await ctx.db.patch(user._id, { budget: (user.budget ?? 0) - budgetDiff });
-        updateFields.budget = budget;
-      }
+      if (!user) throw new Error("User not found");
+
+      const budgetDiff = updates.budget - goal.budget;
+      if (user.budget < budgetDiff) throw new Error("Insufficient budget");
+
+      await ctx.db.patch(user._id, { budget: user.budget - budgetDiff });
     }
 
-    await ctx.db.patch(id, updateFields);
+    return await ctx.db.patch(id, updates);
   },
 });
 
@@ -154,10 +148,9 @@ export const completeGoal = mutation({
     await ctx.db.patch(id, { status: newStatus });
 
     if (newStatus === "completed") {
-      const budget = typeof goal.budget === 'number' ? goal.budget : 0;
       await ctx.db.patch(user._id, { 
-        budget: (user.budget ?? 0) + budget,
-        score: (user.score ?? 0) + budget
+        budget: user.budget + goal.budget,
+        score: user.score + goal.budget
       });
     }
   },
@@ -204,6 +197,17 @@ export const verifyGoal = mutation({
       });
     } else {
       await ctx.db.patch(goalId, { status: "unfinished" });
+      const verifier = await ctx.db
+        .query("users")
+        .filter((q) => q.eq(q.field("userId"), goal.verifierId))
+        .first();
+      if (verifier) {
+        const verifierReward = Math.floor(goal.budget * 0.5);
+        await ctx.db.patch(verifier._id, { 
+          budget: verifier.budget + verifierReward,
+          score: verifier.score + verifierReward
+        });
+      }
     }
   },
 });

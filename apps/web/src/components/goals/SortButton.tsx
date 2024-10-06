@@ -4,7 +4,7 @@ import { IconType } from 'react-icons';
 interface SortButtonProps {
   field: string;
   currentSort: string;
-  onSort: (field: string) => void;
+  onSort: (field: any) => void;  // Change this to accept any type
   icon: IconType;
 }
 

@@ -1,6 +1,7 @@
 "use client";
 
 import { api } from "@packages/backend/convex/_generated/api";
+import { Id } from "@packages/backend/convex/_generated/dataModel";
 import { useMutation, useQuery } from "convex/react";
 import { format } from 'date-fns';
 import React, { useEffect, useRef, useState } from 'react';
@@ -121,11 +122,11 @@ const Goals: React.FC = () => {
     await addBudget();
   };
 
-  const handleCompleteGoal = (goalId: string) => {
+  const handleCompleteGoal = (goalId: Id<"goals">) => {
     completeGoal({ id: goalId });
   };
 
-  const handleNotAchievedGoal = (goalId: string) => {
+  const handleNotAchievedGoal = (goalId: Id<"goals">) => {
     setGoalNotAchieved({ id: goalId });
   };
 

@@ -3,6 +3,7 @@
 import GoalItem from "@/components/goals/GoalItem";
 import Header from "@/components/Header";
 import { api } from "@packages/backend/convex/_generated/api";
+import { Id } from "@packages/backend/convex/_generated/dataModel";
 import { useMutation, useQuery } from "convex/react";
 import React, { useEffect } from 'react';
 
@@ -25,7 +26,7 @@ const VerifierTasks: React.FC = () => {
     console.log("Users:", users);
   }, [users]);
 
-  const handleVerify = async (goalId: string, status: "passed" | "failed") => {
+  const handleVerify = async (goalId: Id<"goals">, status: "passed" | "failed") => {
     try {
       await verifyGoal({ goalId, status });
       console.log(`Goal ${goalId} verified as ${status}`);

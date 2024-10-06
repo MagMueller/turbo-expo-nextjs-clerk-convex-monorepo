@@ -1,5 +1,7 @@
 "use client";
-import { differenceInDays, format } from 'date-fns';
+import { api } from "@packages/backend/convex/_generated/api";
+import { useQuery } from "convex/react";
+import { differenceInCalendarDays, format } from 'date-fns';
 import React from 'react';
 import { FaCalendarAlt, FaCheck, FaTimes, FaUserCheck, FaWallet } from 'react-icons/fa';
 
@@ -18,10 +20,12 @@ export interface GoalProps {
 }
 
 const GoalItem: React.FC<GoalProps> = ({ goal, onComplete, onNotAchieved }) => {
+  const verifier = useQuery(api.users.getUser, goal.verifierId ? { userId: goal.verifierId } : "skip");
+
   const getDaysLeft = (deadline: string) => {
     const today = new Date();
     const deadlineDate = new Date(deadline);
-    const diffDays = differenceInDays(deadlineDate, today);
+    const diffDays = differenceInCalendarDays(deadlineDate, today);
     
     if (diffDays === 0) return "Today";
     if (diffDays === 1) return "Tomorrow";
@@ -47,7 +51,7 @@ const GoalItem: React.FC<GoalProps> = ({ goal, onComplete, onNotAchieved }) => {
           </span>
           <span className="flex items-center">
             <FaUserCheck className={`mr-1 ${goal.verifierId ? 'text-pink-500' : 'text-gray-400'}`} />
-            <span className="text-sm">{goal.verifierId ? 'Has Verifier' : 'No Verifier'}</span>
+            <span className="text-sm">{goal.verifierId ? (verifier?.name || 'Loading...') : 'No Verifier'}</span>
           </span>
           <span className="flex items-center">
             <FaWallet className="mr-1 text-green-700" />

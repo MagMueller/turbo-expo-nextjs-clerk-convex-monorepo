@@ -5,12 +5,15 @@ import { SignInButton } from "@clerk/nextjs";
 import { api } from "@packages/backend/convex/_generated/api";
 import { useQuery } from "convex/react";
 import Link from 'next/link';
-import { useState } from 'react';
+import { usePathname, useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
 import ScoreBudgetDisplay from "./common/ScoreBudgetDisplay";
 import { UserNav } from "./common/UserNav";
 
 const Header = () => {
-  const [activeTab, setActiveTab] = useState('goals');
+  const router = useRouter();
+  const pathname = usePathname();
+  const [activeTab, setActiveTab] = useState('');
   const { isSignedIn, user } = useUser();
   const currentUser = useQuery(api.users.getCurrentUser);
 
@@ -19,6 +22,18 @@ const Header = () => {
     { name: 'Friends', href: '/friends', id: 'friends' },
     { name: 'Verify', href: '/verifier', id: 'verifier' },
   ];
+
+  useEffect(() => {
+    const currentTab = tabs.find(tab => tab.href === pathname);
+    if (currentTab) {
+      setActiveTab(currentTab.id);
+    }
+  }, [pathname]);
+
+  const handleTabClick = (tabId: string, href: string) => {
+    setActiveTab(tabId);
+    router.push(href);
+  };
 
   return (
     <nav className="bg-gray-800">
@@ -31,18 +46,17 @@ const Header = () => {
             <div className="hidden md:block">
               <div className="ml-10 flex items-baseline space-x-4">
                 {tabs.map((tab) => (
-                  <Link
+                  <button
                     key={tab.id}
-                    href={tab.href}
                     className={`${
                       activeTab === tab.id
                         ? 'bg-gray-900 text-white'
                         : 'text-gray-300 hover:bg-gray-700 hover:text-white'
                     } px-10 py-3 rounded-md text-base font-bold`}
-                    onClick={() => setActiveTab(tab.id)}
+                    onClick={() => handleTabClick(tab.id, tab.href)}
                   >
                     {tab.name}
-                  </Link>
+                  </button>
                 ))}
               </div>
             </div>

@@ -158,10 +158,10 @@ const Goals: React.FC = () => {
   );
 
   return (
-    <div className="flex flex-col h-screen bg-[#EDEDED]" onKeyDown={handleKeyDown}>
+    <div className="flex flex-col h-screen bg-[#EDEDED]">
       <div className="flex-grow overflow-auto">
         <div className="container mx-auto px-4 py-8">
-          <h1 className="text-3xl font-bold mb-6">Goals</h1>
+          <h1 className="text-3xl font-bold mb-6">Time is Money</h1>
           <div className="mb-6 flex items-center space-x-2 bg-white p-4 rounded-lg shadow">
             <input
               ref={inputRef}
@@ -179,14 +179,14 @@ const Goals: React.FC = () => {
               value={newGoalBudget}
               onChange={(e) => setNewGoalBudget(Number(e.target.value))}
               onKeyPress={handleCreateGoal}
-              className="p-2 border rounded w-24 text-lg"
+              className="p-2 border rounded w-20 text-lg"
             />
             <div className="relative">
               <button
                 onClick={() => setIsDatePickerOpen(!isDatePickerOpen)}
-                className="p-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+                className="p-3 bg-blue-500 text-white rounded hover:bg-blue-600 text-lg"
               >
-                <FaCalendarAlt />
+                <FaCalendarAlt className="text-xl" />
               </button>
               {isDatePickerOpen && (
                 <div className="absolute z-10 mt-2 left-0">
@@ -204,9 +204,9 @@ const Goals: React.FC = () => {
             <div className="relative">
               <button
                 onClick={() => setIsVerifierSelectOpen(!isVerifierSelectOpen)}
-                className="p-2 bg-green-500 text-white rounded hover:bg-green-600"
+                className="p-3 bg-green-500 text-white rounded hover:bg-green-600 text-lg"
               >
-                <FaUserCheck />
+                <FaUserCheck className="text-xl" />
               </button>
               {isVerifierSelectOpen && (
                 <div className="absolute z-10 mt-2 left-0 bg-white border rounded shadow-lg p-4">
@@ -218,7 +218,7 @@ const Goals: React.FC = () => {
                           setNewGoalVerifier(friend.friendId);
                           setIsVerifierSelectOpen(false);
                         }}
-                        className="cursor-pointer hover:bg-gray-100 p-2"
+                        className="cursor-pointer hover:bg-gray-100 p-2 text-lg"
                       >
                         {friend.friendName}
                       </li>
@@ -229,7 +229,7 @@ const Goals: React.FC = () => {
             </div>
             <button
               onClick={handleCreateGoal}
-              className="p-3 bg-blue-500 text-white rounded hover:bg-blue-600 text-lg"
+              className="p-2 bg-blue-500 text-white rounded hover:bg-blue-600 text-lg"
             >
               Create Goal
             </button>
@@ -266,9 +266,9 @@ const Goals: React.FC = () => {
           {totalBudgetInOpenAndPendingTasks < 20 && (
             <button
               onClick={handleAddBudget}
-              className="mt-4 p-3 bg-green-500 text-white rounded hover:bg-green-600 text-lg"
+              className="mt-4 p-4 bg-gray-500 text-white rounded hover:bg-green-600 text-lg"
             >
-              Add 10 to Budget
+              +10 Budget - next week you will pay for it
             </button>
           )}
         </div>

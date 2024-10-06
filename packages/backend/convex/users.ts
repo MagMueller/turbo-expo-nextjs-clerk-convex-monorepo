@@ -18,13 +18,12 @@ export const getCurrentUser = query({
       return null;
     }
 
-    // Initialize budget to 10 if not set
-    if (user.budget === undefined) {
-      await ctx.db.patch(user._id, { budget: 10 });
-      user.budget = 10;
-    }
-
-    return user;
+    // Ensure budget and score are always returned
+    return {
+      ...user,
+      budget: user.budget ?? 100,
+      score: user.score ?? 0,
+    };
   },
 });
 
@@ -40,20 +39,21 @@ export const createOrUpdateUser = mutation({
       .first();
 
     if (existingUser) {
-      const updateFields: { name: string; email: string; budget?: number } = { name, email };
-      if (!('budget' in existingUser)) {
-        updateFields.budget = 10;
-      }
-      await ctx.db.patch(existingUser._id, updateFields);
-      return existingUser._id;
+      const updatedUser = await ctx.db.patch(existingUser._id, {
+        name,
+        email,
+        budget: existingUser.budget ?? 100,
+        score: existingUser.score ?? 0,
+      });
+      return updatedUser._id;
     }
 
-    const newUserId = await ctx.db.insert("users", { 
-      userId, 
-      name, 
-      email, 
-      budget: 10, 
-      score: 0 
+    const newUserId = await ctx.db.insert("users", {
+      userId,
+      name,
+      email,
+      budget: 100,
+      score: 0,
     });
     return newUserId;
   },
@@ -66,6 +66,27 @@ export const getUser = query({
         .query("users")
         .filter((q) => q.eq(q.field("userId"), userId))
         .first();
+      
+      if (user && user.budget === undefined) {
+        const updatedUser = await ctx.db.patch(user._id, { budget: 100, score: 0 });
+        return updatedUser;
+      }
+      
       return user;
+  },
+});
+
+export const updateAllUsersWithDefaultValues = mutation({
+  args: {},
+  handler: async (ctx) => {
+    const users = await ctx.db.query("users").collect();
+    for (const user of users) {
+      if (user.budget === undefined || user.score === undefined) {
+        await ctx.db.patch(user._id, {
+          budget: user.budget ?? 100,
+          score: user.score ?? 0,
+        });
+      }
+    }
   },
 });

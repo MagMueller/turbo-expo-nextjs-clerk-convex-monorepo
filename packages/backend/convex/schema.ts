@@ -2,6 +2,14 @@ import { defineSchema, defineTable } from "convex/server";
 import { v } from "convex/values";
 
 export default defineSchema({
+  users: defineTable({
+    userId: v.string(),
+    name: v.string(),
+    email: v.string(),
+    budget: v.number(),
+    score: v.number(),
+  }).index("by_userId", ["userId"]),
+
   goals: defineTable({
     userId: v.string(),
     title: v.string(),
@@ -11,13 +19,6 @@ export default defineSchema({
     verifierId: v.optional(v.string()),
     status: v.optional(v.string()), // "pending", "passed", "failed"
     budget: v.optional(v.number()),
-  }),
-  users: defineTable({
-    userId: v.string(),
-    name: v.string(),
-    email: v.string(),
-    budget: v.number(),
-    score: v.number(),
   }),
   friends: defineTable({
     userId: v.string(),

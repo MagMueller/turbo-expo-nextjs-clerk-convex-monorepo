@@ -50,7 +50,11 @@ const Header = () => {
           <div className="flex items-center">
             {isSignedIn ? (
               <>
-                <ScoreBudgetDisplay score={currentUser?.score || 0} budget={currentUser?.budget || 0} darkMode={true} />
+                <ScoreBudgetDisplay 
+                  score={currentUser?.score ?? 0} 
+                  budget={currentUser?.budget ?? 0} 
+                  darkMode={true} 
+                />
                 <UserNav
                   image={user?.imageUrl}
                   name={user?.fullName ?? ''}

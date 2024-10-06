@@ -2,13 +2,17 @@
 
 import { useUser } from "@clerk/clerk-react";
 import { SignInButton } from "@clerk/nextjs";
+import { api } from "@packages/backend/convex/_generated/api";
+import { useQuery } from "convex/react";
 import Link from 'next/link';
 import { useState } from 'react';
+import ScoreBudgetDisplay from "./common/ScoreBudgetDisplay";
 import { UserNav } from "./common/UserNav";
 
 const Header = () => {
   const [activeTab, setActiveTab] = useState('goals');
   const { isSignedIn, user } = useUser();
+  const currentUser = useQuery(api.users.getCurrentUser);
 
   const tabs = [
     { name: 'Goals', href: '/goals', id: 'goals' },
@@ -45,11 +49,14 @@ const Header = () => {
           </div>
           <div className="flex items-center">
             {isSignedIn ? (
-              <UserNav
-                image={user?.imageUrl}
-                name={user?.fullName ?? ''}
-                email={user?.primaryEmailAddress?.emailAddress ?? ''}
-              />
+              <>
+                <ScoreBudgetDisplay score={currentUser?.score || 0} budget={currentUser?.budget || 0} darkMode={true} />
+                <UserNav
+                  image={user?.imageUrl}
+                  name={user?.fullName ?? ''}
+                  email={user?.primaryEmailAddress?.emailAddress ?? ''}
+                />
+              </>
             ) : (
               <SignInButton mode="modal">
                 <button className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-700">

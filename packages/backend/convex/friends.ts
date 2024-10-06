@@ -31,6 +31,8 @@ export const getFriends = query({
           friendId,
           friendName: friendUser?.name || "Unknown",
           friendEmail: friend.status === "accepted" ? friendUser?.email : null,
+          score: friend.status === "accepted" ? friendUser?.score : null,
+          budget: friend.status === "accepted" ? friendUser?.budget : null,
           isSender
         };
       })

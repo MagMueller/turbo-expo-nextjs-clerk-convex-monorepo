@@ -2,6 +2,7 @@
 import { api } from "@packages/backend/convex/_generated/api";
 import { useQuery } from "convex/react";
 import { useParams } from "next/navigation";
+import ScoreBudgetDisplay from "../common/ScoreBudgetDisplay";
 
 const FriendProfile = () => {
   const params = useParams();
@@ -24,7 +25,9 @@ const FriendProfile = () => {
       </h1>
       
       <div className="space-y-4">
-        <h2 className="text-xl font-semibold mb-2">{friend.name}'s Goals</h2>
+        <h2 className="text-xl font-semibold mb-2">{friend.name}'s Profile</h2>
+        <ScoreBudgetDisplay score={friend.score || 0} budget={friend.budget || 0} darkMode={false} />
+        <h3 className="text-lg font-semibold mt-4 mb-2">{friend.name}'s Goals</h3>
         {friendGoals?.map((goal) => (
           <div key={goal._id} className="p-4 bg-gray-100 rounded">
             <h3 className="font-semibold">{goal.title}</h3>
@@ -32,7 +35,6 @@ const FriendProfile = () => {
           </div>
         ))}
       </div>
-
     </div>
   );
 };

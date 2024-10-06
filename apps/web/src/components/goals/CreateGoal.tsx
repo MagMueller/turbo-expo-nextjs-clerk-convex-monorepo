@@ -15,6 +15,7 @@ export default function CreateGoal() {
   const [newGoalDeadline, setNewGoalDeadline] = useState("");
   const [verifierSearch, setVerifierSearch] = useState("");
   const [isVerifierSelectOpen, setIsVerifierSelectOpen] = useState(false);
+  const [budget, setBudget] = useState<number>(0);
 
   const cancelButtonRef = useRef(null);
 
@@ -34,6 +35,7 @@ export default function CreateGoal() {
       isSummary: isChecked,
       deadline: newGoalDeadline || undefined,
       verifierId: verifierId || undefined,
+      budget,
     });
     setOpen(false);
   };
@@ -133,40 +135,35 @@ export default function CreateGoal() {
                               className="w-full p-2 border rounded"
                             />
                           </div>
-                          <div className="mt-2 relative">
-                            <button
-                              type="button"
-                              onClick={handleVerifierSelectToggle}
-                              className="w-full p-2 border rounded text-left"
+                          <div className="mt-4">
+                            <label htmlFor="budget" className="block text-sm font-medium text-gray-700">
+                              Budget
+                            </label>
+                            <input
+                              type="number"
+                              id="budget"
+                              value={budget}
+                              onChange={(e) => setBudget(Number(e.target.value))}
+                              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                            />
+                          </div>
+                          <div className="mt-4">
+                            <label htmlFor="verifier" className="block text-sm font-medium text-gray-700">
+                              Assign Verifier
+                            </label>
+                            <select
+                              id="verifier"
+                              value={verifierId}
+                              onChange={(e) => setVerifierId(e.target.value)}
+                              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
                             >
-                              {verifierId ? "Change Verifier" : "Set Verifier"}
-                            </button>
-                            {isVerifierSelectOpen && (
-                              <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg">
-                                <input
-                                  type="text"
-                                  placeholder="Search friends"
-                                  value={verifierSearch}
-                                  onChange={(e) => setVerifierSearch(e.target.value)}
-                                  className="w-full p-2 border-b border-gray-300"
-                                  onClick={(e) => e.stopPropagation()}
-                                />
-                                <ul className="max-h-40 overflow-y-auto">
-                                  {filteredFriends?.map((friend) => (
-                                    <li
-                                      key={friend.friendId}
-                                      className="p-2 hover:bg-gray-100 cursor-pointer"
-                                      onClick={() => {
-                                        setVerifierId(friend.friendId);
-                                        setIsVerifierSelectOpen(false);
-                                      }}
-                                    >
-                                      {friend.friendName} ({friend.friendEmail})
-                                    </li>
-                                  ))}
-                                </ul>
-                              </div>
-                            )}
+                              <option value="">Select a verifier</option>
+                              {friends?.map((friend) => (
+                                <option key={friend.friendId} value={friend.friendId}>
+                                  {friend.friendName}
+                                </option>
+                              ))}
+                            </select>
                           </div>
                         </div>
                       </div>

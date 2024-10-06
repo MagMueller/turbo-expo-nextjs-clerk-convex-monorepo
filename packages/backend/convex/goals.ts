@@ -44,17 +44,34 @@ export const createGoal = mutation({
     isSummary: v.boolean(),
     deadline: v.optional(v.string()),
     verifierId: v.optional(v.string()),
+    budget: v.number(),
   },
-  handler: async (ctx, { title, content, isSummary, deadline, verifierId }) => {
+  handler: async (ctx, { title, content, isSummary, deadline, verifierId, budget }) => {
     const userId = await getUserId(ctx);
     if (!userId) throw new Error("User not found");
+
+    const user = await ctx.db
+      .query("users")
+      .filter((q) => q.eq(q.field("userId"), userId))
+      .first();
+    
+    if (!user || (budget > 0 && user.budget < budget)) {
+      throw new Error("Not enough budget");
+    }
+
+    // Deduct budget from user only if budget is greater than 0
+    if (budget > 0) {
+      await ctx.db.patch(user._id, { budget: user.budget - budget });
+    }
+
     const goalId = await ctx.db.insert("goals", { 
       userId, 
       title, 
       content, 
-      deadline, 
+      deadline,
       verifierId,
-      status: "unfinished"
+      status: "unfinished",
+      budget
     });
 
     if (isSummary) {
@@ -79,10 +96,34 @@ export const deleteGoal = mutation({
 });
 
 export const updateGoal = mutation({
-  args: { id: v.id("goals"), deadline: v.optional(v.string()) },
+  args: { 
+    id: v.id("goals"), 
+    deadline: v.optional(v.string()),
+    budget: v.optional(v.number())
+  },
   handler: async (ctx, args) => {
-    const { id, deadline } = args;
-    await ctx.db.patch(id, { deadline });
+    const { id, deadline, budget } = args;
+    const goal = await ctx.db.get(id);
+    if (!goal) throw new Error("Goal not found");
+
+    const updateFields: { deadline?: string; budget?: number } = {};
+    if (deadline !== undefined) updateFields.deadline = deadline;
+    if (budget !== undefined && budget > (goal.budget || 0)) {
+      updateFields.budget = budget;
+      
+      // Deduct additional budget from user
+      const user = await ctx.db
+        .query("users")
+        .filter((q) => q.eq(q.field("userId"), goal.userId))
+        .first();
+      
+      if (!user || user.budget < (budget - (goal.budget || 0))) {
+        throw new Error("Not enough budget");
+      }
+
+      await ctx.db.patch(user._id, { budget: user.budget - (budget - (goal.budget || 0)) });
+    }
+    await ctx.db.patch(id, updateFields);
   },
 });
 
@@ -95,8 +136,22 @@ export const completeGoal = mutation({
     const goal = await ctx.db.get(id);
     if (!goal) throw new Error("Goal not found");
 
+    const user = await ctx.db
+      .query("users")
+      .filter((q) => q.eq(q.field("userId"), goal.userId))
+      .first();
+
+    if (!user) throw new Error("User not found");
+
     const newStatus = goal.verifierId ? "pending" : "completed";
     await ctx.db.patch(id, { status: newStatus });
+
+    if (newStatus === "completed") {
+      await ctx.db.patch(user._id, { 
+        budget: user.budget + goal.budget,
+        score: user.score + goal.budget
+      });
+    }
   },
 });
 
@@ -126,8 +181,19 @@ export const verifyGoal = mutation({
     const goal = await ctx.db.get(goalId);
     if (!goal) throw new Error("Goal not found");
 
+    const user = await ctx.db
+      .query("users")
+      .filter((q) => q.eq(q.field("userId"), goal.userId))
+      .first();
+
+    if (!user) throw new Error("User not found");
+
     if (status === "passed") {
       await ctx.db.patch(goalId, { status: "completed" });
+      await ctx.db.patch(user._id, { 
+        budget: user.budget + goal.budget,
+        score: user.score + goal.budget
+      });
     } else {
       await ctx.db.patch(goalId, { status: "unfinished" });
     }

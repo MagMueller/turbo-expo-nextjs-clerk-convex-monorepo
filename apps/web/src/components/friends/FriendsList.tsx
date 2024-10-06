@@ -3,6 +3,7 @@ import { api } from "@packages/backend/convex/_generated/api";
 import { useMutation, useQuery } from "convex/react";
 import Link from "next/link";
 import { useState } from "react";
+import ScoreBudgetDisplay from "../common/ScoreBudgetDisplay";
 
 const FriendsList = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -59,7 +60,9 @@ const FriendsList = () => {
             <Link href={`/friends/${friend.friendId}`}>
               <span>{friend.friendName}</span>
             </Link>
-            {friend.status === "accepted" && <span>{friend.friendEmail}</span>}
+            {friend.status === "accepted" && (
+              <ScoreBudgetDisplay score={friend.score || 0} budget={friend.budget || 0} darkMode={false} />
+            )}
             {friend.status === "pending" && friend.isSender && (
               <span className="text-yellow-500">Pending</span>
             )}

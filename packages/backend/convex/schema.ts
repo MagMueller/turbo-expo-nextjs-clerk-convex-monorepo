@@ -10,11 +10,14 @@ export default defineSchema({
     deadline: v.optional(v.string()),
     verifierId: v.optional(v.string()),
     status: v.optional(v.string()), // "pending", "passed", "failed"
+    budget: v.optional(v.number()),
   }),
   users: defineTable({
     userId: v.string(),
     name: v.string(),
     email: v.string(),
+    budget: v.number(),
+    score: v.number(),
   }),
   friends: defineTable({
     userId: v.string(),

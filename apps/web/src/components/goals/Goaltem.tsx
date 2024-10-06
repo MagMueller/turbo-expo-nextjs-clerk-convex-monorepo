@@ -3,7 +3,7 @@ import { useQuery } from "convex/react";
 import Image from 'next/image';
 import Link from "next/link";
 import { useRef, useState } from "react";
-import { FaCheck, FaUserCheck } from 'react-icons/fa';
+import { FaCalendarAlt, FaCheck, FaUserCheck } from 'react-icons/fa';
 import DatePicker from "./DatePicker";
 
 export interface GoalProps {
@@ -14,6 +14,7 @@ export interface GoalProps {
     deadline?: string;
     verifierId?: string;
     status?: string;
+    budget?: number;
   };
   deleteGoal: any;
   updateGoal: (id: string, deadline: string) => void;
@@ -27,6 +28,7 @@ const GoalItem = ({ goal, deleteGoal, updateGoal, updateVerifier, completeGoal }
   const [verifierSearch, setVerifierSearch] = useState("");
   const buttonRef = useRef<HTMLButtonElement>(null);
   const verifierRef = useRef<HTMLButtonElement>(null);
+  const [budgetValue, setBudgetValue] = useState(goal.budget || 0);
 
   const friends = useQuery(api.friends.getFriends);
   const verifier = goal.verifierId ? useQuery(api.users.getUser, { userId: goal.verifierId }) : null;
@@ -58,6 +60,11 @@ const GoalItem = ({ goal, deleteGoal, updateGoal, updateVerifier, completeGoal }
     setIsVerifierSelectOpen(!isVerifierSelectOpen);
   };
 
+  const handleBudgetChange = (newBudget: number) => {
+    updateGoal(goal._id, undefined, newBudget);
+    setBudgetValue(newBudget);
+  };
+
   return (
     <div className="flex justify-between items-center min-h-[74px] bg-[#F9FAFB] py-5 px-5 sm:px-11 gap-x-5 sm:gap-x-10">
       <Link href={`/goals/${goal._id}`} className="flex-1">
@@ -65,21 +72,16 @@ const GoalItem = ({ goal, deleteGoal, updateGoal, updateVerifier, completeGoal }
           {goal.title}
         </h1>
       </Link>
-      <div className="relative">
+      <div className="relative flex items-center space-x-2">
         <button
           ref={buttonRef}
           onClick={handleDatePickerToggle}
           className="text-[#2D2D2D] text-center text-xl font-medium leading-[114.3%] tracking-[-0.5px]"
-          title={goal.deadline ? new Date(goal.deadline).toLocaleDateString() : "Set deadline"}
         >
-          {goal.deadline ? (
-            <span className="text-2xl font-light">{daysUntilDeadline} days left</span>
-          ) : (
-            "Set Deadline"
-          )}
+          <FaCalendarAlt className="text-blue-500 hover:text-blue-700" />
         </button>
         {isDatePickerOpen && (
-          <div className="absolute z-10 right-0 mt-2">
+          <div className="absolute z-10 top-full mt-2">
             <DatePicker
               value={goal.deadline || ""}
               onChange={handleDeadlineChange}
@@ -87,6 +89,12 @@ const GoalItem = ({ goal, deleteGoal, updateGoal, updateVerifier, completeGoal }
             />
           </div>
         )}
+        <input
+          type="number"
+          value={budgetValue}
+          onChange={(e) => handleBudgetChange(Number(e.target.value))}
+          className="w-20 p-1 text-sm border rounded"
+        />
       </div>
       <div className="relative flex flex-col items-center">
         <button

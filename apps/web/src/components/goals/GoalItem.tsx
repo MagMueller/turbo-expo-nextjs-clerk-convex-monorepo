@@ -46,22 +46,22 @@ const GoalItem: React.FC<GoalProps> = ({ goal, onComplete, onNotAchieved }) => {
         <h3 className="text-xl font-semibold text-gray-800 mr-2">{goal.title}</h3>
         <div className="flex items-center space-x-4 flex-wrap">
           <span className="flex items-center">
-            <FaCalendarAlt className={`mr-1 ${goal.deadline ? 'text-blue-500' : 'text-gray-400'}`} />
-            <span className="text-sm">{goal.deadline ? `${formatDate(goal.deadline)} (${getDaysLeft(goal.deadline)})` : 'No Deadline'}</span>
+            <FaCalendarAlt className="mr-1 text-black" />
+            <span className="text-sm text-black">{goal.deadline ? `${formatDate(goal.deadline)} (${getDaysLeft(goal.deadline)})` : 'No Deadline'}</span>
           </span>
           <span className="flex items-center">
             <FaUserCheck className={`mr-1 ${goal.verifierId ? 'text-pink-500' : 'text-gray-400'}`} />
             <span className="text-sm">{goal.verifierId ? (verifier?.name || 'Loading...') : 'No Verifier'}</span>
           </span>
           <span className="flex items-center">
-            <FaWallet className="mr-1 text-green-700" />
+            <FaWallet className="mr-1 text-green-400" />
             <span className="text-sm">Budget: {goal.budget || 0}</span>
           </span>
           {!isCompleted && onComplete && onNotAchieved && (
             <div className="flex space-x-2">
               <button 
                 onClick={onComplete} 
-                className="p-2 bg-green-500 text-white rounded-full hover:bg-green-600 transition duration-300"
+                className="p-2 bg-green-700 text-white rounded-full hover:bg-green-800 transition duration-300"
                 title="Mark as Completed"
               >
                 <FaCheck className="text-xl" />

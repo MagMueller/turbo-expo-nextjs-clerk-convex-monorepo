@@ -138,7 +138,7 @@ const Goals: React.FC = () => {
         <div className="relative">
           <button
             onClick={() => setIsDatePickerOpen(!isDatePickerOpen)}
-            className="p-3 bg-blue-500 text-white rounded hover:bg-blue-600 text-lg"
+            className="p-3 bg-black text-white rounded hover:bg-gray-800 text-lg"
           >
             <FaCalendarAlt className="text-xl" />
           </button>
@@ -183,7 +183,7 @@ const Goals: React.FC = () => {
         </div>
         <button
           onClick={handleCreateGoal}
-          className="p-2 bg-black text-white rounded hover:bg-gray-800 text-lg"
+          className="p-2 bg-blue-500 text-white rounded hover:bg-blue-600 text-lg"
         >
           Create Goal
         </button>

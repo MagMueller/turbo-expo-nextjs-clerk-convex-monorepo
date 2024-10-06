@@ -26,7 +26,7 @@ const Header = () => {
         <div className="flex items-center justify-between h-16">
           <div className="flex items-center">
             <div className="flex-shrink-0">
-              <Link href="/" className="text-white text-xl font-bold">King of Life</Link>
+              <Link href="/" className="text-white text-xl font-bold">Time is Money</Link>
             </div>
             <div className="hidden md:block">
               <div className="ml-10 flex items-baseline space-x-4">

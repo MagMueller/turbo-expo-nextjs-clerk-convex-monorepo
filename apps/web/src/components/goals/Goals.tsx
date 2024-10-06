@@ -3,7 +3,7 @@
 import { api } from "@packages/backend/convex/_generated/api";
 import { useMutation, useQuery } from "convex/react";
 import React, { useEffect, useRef, useState } from 'react';
-import { FaCalendarAlt, FaSort, FaUserCheck, FaWallet } from 'react-icons/fa';
+import { FaCalendarAlt, FaChevronDown, FaChevronUp, FaSort, FaUserCheck, FaWallet } from 'react-icons/fa';
 import DatePicker from "./DatePicker";
 import GoalItem from "./GoalItem";
 
@@ -21,13 +21,18 @@ const Goals: React.FC = () => {
   const budgetInputRef = useRef<HTMLInputElement>(null);
   const [sortBy, setSortBy] = useState<SortField>("createdAt");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
+  const [openSections, setOpenSections] = useState({
+    unfinished: true,
+    achieved: true,
+    notAchieved: true
+  });
 
   const allGoals = useQuery(api.goals.getGoals) || [];
-
   const createGoal = useMutation(api.goals.createGoal);
-  const deleteGoal = useMutation(api.goals.deleteGoal);
   const updateGoal = useMutation(api.goals.updateGoal);
   const completeGoal = useMutation(api.goals.completeGoal);
+  const setGoalNotAchieved = useMutation(api.goals.setGoalNotAchieved);
+  const addBudget = useMutation(api.goals.addBudget);
   const friends = useQuery(api.friends.getFriends);
   const currentUser = useQuery(api.users.getCurrentUser);
 
@@ -41,11 +46,27 @@ const Goals: React.FC = () => {
     return <div>Loading goals...</div>;
   }
 
-  const unfinishedGoals = allGoals.filter(goal => goal.status === "unfinished");
-  const finishedGoals = allGoals.filter(goal => goal.status === "completed" || goal.status === "pending");
+  const sortedGoals = [...allGoals].sort((a, b) => {
+    if (sortBy === "title") {
+      return sortOrder === "asc" ? a.title.localeCompare(b.title) : b.title.localeCompare(a.title);
+    } else if (sortBy === "createdAt") {
+      return sortOrder === "asc" ? a._creationTime - b._creationTime : b._creationTime - a._creationTime;
+    } else if (sortBy === "deadline") {
+      const aDeadline = a.deadline ? new Date(a.deadline).getTime() : Infinity;
+      const bDeadline = b.deadline ? new Date(b.deadline).getTime() : Infinity;
+      return sortOrder === "asc" ? aDeadline - bDeadline : bDeadline - aDeadline;
+    } else if (sortBy === "budget") {
+      return sortOrder === "asc" ? (a.budget || 0) - (b.budget || 0) : (b.budget || 0) - (a.budget || 0);
+    }
+    return 0;
+  });
 
-  console.log("Unfinished goals:", unfinishedGoals);
-  console.log("Finished goals:", finishedGoals);
+  const unfinishedGoals = sortedGoals.filter(goal => goal.status === "unfinished");
+  const pendingGoals = sortedGoals.filter(goal => goal.status === "pending");
+  const achievedGoals = sortedGoals.filter(goal => goal.status === "completed");
+  const notAchievedGoals = sortedGoals.filter(goal => goal.status === "failed");
+
+  const totalBudgetInOpenAndPendingTasks = unfinishedGoals.concat(pendingGoals).reduce((sum, goal) => sum + (goal.budget || 0), 0);
 
   const handleCreateGoal = async (e: React.KeyboardEvent<HTMLInputElement> | React.MouseEvent<HTMLButtonElement>) => {
     if ((e.type === 'keypress' && (e as React.KeyboardEvent).key === 'Enter') || e.type === 'click') {
@@ -100,20 +121,56 @@ const Goals: React.FC = () => {
     }
   };
 
+  const toggleSection = (section: 'unfinished' | 'achieved' | 'notAchieved') => {
+    setOpenSections(prev => ({ ...prev, [section]: !prev[section] }));
+  };
+
+  const handleAddBudget = async () => {
+    if (totalBudgetInOpenAndPendingTasks < 20) {
+      await addBudget();
+    }
+  };
+
+  const renderGoalSection = (title: string, goals: any[], section: 'unfinished' | 'pending' | 'achieved' | 'notAchieved') => (
+    <div className="mb-8">
+      <div
+        className="flex justify-between items-center cursor-pointer"
+        onClick={() => toggleSection(section)}
+      >
+        <h2 className="text-2xl font-bold">{title} ({goals.length})</h2>
+        {openSections[section] ? <FaChevronUp /> : <FaChevronDown />}
+      </div>
+      {openSections[section] && (
+        <div className="space-y-4 mt-4">
+          {goals.map((goal) => (
+            <GoalItem
+              key={goal._id}
+              goal={goal}
+              onUpdate={updateGoal}
+              onNotAchieved={() => setGoalNotAchieved({ id: goal._id })}
+              onComplete={() => completeGoal({ id: goal._id })}
+              isCompleted={section === 'achieved' || section === 'notAchieved'}
+            />
+          ))}
+        </div>
+      )}
+    </div>
+  );
+
   return (
     <div className="flex flex-col h-screen bg-[#EDEDED]" onKeyDown={handleKeyDown}>
       <div className="flex-grow overflow-auto">
         <div className="container mx-auto px-4 py-8">
-          <h1 className="text-3xl font-bold mb-6">Your Goals</h1>
+          <h1 className="text-3xl font-bold mb-6">Goals</h1>
           <div className="mb-6 flex items-center space-x-2 bg-white p-4 rounded-lg shadow">
             <input
               ref={inputRef}
               type="text"
-              placeholder="New goal title..."
+              placeholder="New goal - create with enter"
               value={newGoalTitle}
               onChange={(e) => setNewGoalTitle(e.target.value)}
               onKeyPress={handleCreateGoal}
-              className="flex-grow p-2 border rounded"
+              className="flex-grow p-2 border rounded text-lg"
             />
             <input
               ref={budgetInputRef}
@@ -122,7 +179,7 @@ const Goals: React.FC = () => {
               value={newGoalBudget}
               onChange={(e) => setNewGoalBudget(Number(e.target.value))}
               onKeyPress={handleCreateGoal}
-              className="p-2 border rounded w-24"
+              className="p-2 border rounded w-24 text-lg"
             />
             <div className="relative">
               <button
@@ -172,7 +229,7 @@ const Goals: React.FC = () => {
             </div>
             <button
               onClick={handleCreateGoal}
-              className="p-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+              className="p-3 bg-blue-500 text-white rounded hover:bg-blue-600 text-lg"
             >
               Create Goal
             </button>
@@ -196,35 +253,24 @@ const Goals: React.FC = () => {
             <button onClick={() => handleSort("createdAt")} className="flex items-center">
               Created At <FaSort />
             </button>
+            <button onClick={() => handleSort("title")} className="flex items-center">
+              Title <FaSort />
+            </button>
           </div>
           
-          <h2 className="text-2xl font-bold mt-8 mb-4">Unfinished Goals</h2>
-          <div className="space-y-4">
-            {unfinishedGoals.map((goal) => (
-              <GoalItem
-                key={goal._id}
-                goal={goal}
-                onUpdate={updateGoal}
-                onDelete={() => deleteGoal({ goalId: goal._id })}
-                onComplete={() => completeGoal({ id: goal._id })}
-                isCompleted={false}
-              />
-            ))}
-          </div>
+          {renderGoalSection("Active", unfinishedGoals, 'unfinished')}
+          {renderGoalSection("Pending", pendingGoals, 'pending')}
+          {renderGoalSection("Achieved", achievedGoals, 'achieved')}
+          {renderGoalSection("Failed", notAchievedGoals, 'notAchieved')}
 
-          <h2 className="text-2xl font-bold mt-8 mb-4">Finished Goals</h2>
-          <div className="space-y-4">
-            {finishedGoals.map((goal) => (
-              <GoalItem
-                key={goal._id}
-                goal={goal}
-                onUpdate={updateGoal}
-                onDelete={() => deleteGoal({ goalId: goal._id })}
-                onComplete={() => {}}
-                isCompleted={true}
-              />
-            ))}
-          </div>
+          {totalBudgetInOpenAndPendingTasks < 20 && (
+            <button
+              onClick={handleAddBudget}
+              className="mt-4 p-3 bg-green-500 text-white rounded hover:bg-green-600 text-lg"
+            >
+              Add 10 to Budget
+            </button>
+          )}
         </div>
       </div>
     </div>

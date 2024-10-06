@@ -124,3 +124,21 @@ export const forceSetAllUsersWithDefaultValues = mutation({
     }
   },
 });
+
+export const getUsers = query({
+  args: { userIds: v.array(v.string()) },
+  handler: async (ctx, { userIds }) => {
+    const users = await ctx.db
+      .query("users")
+      .filter((q) => 
+        userIds.reduce((acc, userId) => 
+          q.or(acc, q.eq(q.field("userId"), userId)), 
+          q.eq(q.field("userId"), "") // Initial false condition
+        )
+      )
+      .collect();
+
+    // Convert array to object with userId as key
+    return Object.fromEntries(users.map(user => [user.userId, user]));
+  },
+});

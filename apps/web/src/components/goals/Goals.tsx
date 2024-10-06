@@ -75,7 +75,7 @@ const Goals: React.FC = () => {
     return 0;
   });
 
-  const unfinishedGoals = sortedGoals.filter(goal => goal.status === "unfinished");
+  const unfinishedGoals = sortedGoals.filter(goal => goal.status === "unfinished" || goal.status === "active");
   const pendingGoals = sortedGoals.filter(goal => goal.status === "pending");
   const achievedGoals = sortedGoals.filter(goal => goal.status === "completed");
   const notAchievedGoals = sortedGoals.filter(goal => goal.status === "failed");

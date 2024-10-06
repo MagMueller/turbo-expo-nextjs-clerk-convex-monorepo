@@ -64,7 +64,7 @@ export const createGoal = mutation({
     const newGoal = await ctx.db.insert("goals", {
       ...args,
       userId,
-      status: "unfinished", // Ensure this is set correctly
+      status: "unfinished", // Change this back to "unfinished"
       createdAt: new Date().toISOString(),
     });
 
@@ -124,28 +124,32 @@ export const completeGoal = mutation({
     const goal = await ctx.db.get(id);
     if (!goal) throw new Error("Goal not found");
 
-    const user = await ctx.db
-      .query("users")
-      .filter((q) => q.eq(q.field("userId"), goal.userId))
-      .first();
-
-    if (!user) throw new Error("User not found");
+    console.log("Completing goal:", goal);
 
     if (goal.verifierId) {
       // If there's a verifier, set the status to pending
       await ctx.db.patch(id, { status: "pending" });
+      console.log("Goal set to pending for verification");
     } else {
       // If there's no verifier, complete the goal immediately
       await ctx.db.patch(id, { status: "completed" });
+      console.log("Goal completed without verification");
       
       // Update user's budget and score
-      const budgetIncrease = goal.budget;
-      const scoreIncrease = goal.budget; // 1x multiplier when no verifier
+      const user = await ctx.db
+        .query("users")
+        .filter((q) => q.eq(q.field("userId"), goal.userId))
+        .first();
 
-      await ctx.db.patch(user._id, { 
-        budget: user.budget + budgetIncrease,
-        score: user.score + scoreIncrease
-      });
+      if (user) {
+        const budgetIncrease = goal.budget;
+        const scoreIncrease = goal.budget; // 1x multiplier when no verifier
+
+        await ctx.db.patch(user._id, { 
+          budget: user.budget + budgetIncrease,
+          score: user.score + scoreIncrease
+        });
+      }
     }
   },
 });
@@ -154,7 +158,8 @@ export const getGoalsToVerify = query({
   args: {},
   handler: async (ctx) => {
     const userId = await getUserId(ctx);
-    if (!userId) return null;
+    console.log("Verifier userId:", userId);
+    if (!userId) return [];
 
     const goalsToVerify = await ctx.db
       .query("goals")
@@ -166,8 +171,10 @@ export const getGoalsToVerify = query({
       )
       .collect();
 
+    console.log("Goals to verify (raw):", goalsToVerify);
+    console.log("Number of goals to verify:", goalsToVerify.length);
     return goalsToVerify;
-  },
+  }
 });
 
 export const verifyGoal = mutation({

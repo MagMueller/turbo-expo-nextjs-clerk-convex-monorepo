@@ -2,8 +2,9 @@
 
 import { api } from "@packages/backend/convex/_generated/api";
 import { useMutation, useQuery } from "convex/react";
+import { format } from 'date-fns';
 import React, { useEffect, useRef, useState } from 'react';
-import { FaCalendarAlt, FaSort, FaUserCheck } from 'react-icons/fa';
+import { FaCalendarAlt, FaSort, FaTimes, FaUserCheck } from 'react-icons/fa';
 import DatePicker from "./DatePicker";
 import GoalSection from "./GoalSection";
 import SortButton from "./SortButton";
@@ -22,6 +23,8 @@ const Goals: React.FC = () => {
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
   const inputRef = useRef<HTMLInputElement>(null);
   const budgetInputRef = useRef<HTMLInputElement>(null);
+  const datePickerRef = useRef<HTMLDivElement>(null);
+  const verifierSelectRef = useRef<HTMLDivElement>(null);
 
   const allGoals = useQuery(api.goals.getGoals) || [];
   const createGoal = useMutation(api.goals.createGoal);
@@ -35,6 +38,20 @@ const Goals: React.FC = () => {
     if (inputRef.current) {
       inputRef.current.focus();
     }
+
+    const handleClickOutside = (event: MouseEvent) => {
+      if (datePickerRef.current && !datePickerRef.current.contains(event.target as Node)) {
+        setIsDatePickerOpen(false);
+      }
+      if (verifierSelectRef.current && !verifierSelectRef.current.contains(event.target as Node)) {
+        setIsVerifierSelectOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
   }, []);
 
   if (allGoals === undefined) {
@@ -112,90 +129,112 @@ const Goals: React.FC = () => {
     setGoalNotAchieved({ id: goalId });
   };
 
+  const formatDate = (date: string) => {
+    return format(new Date(date), 'd. MMM yyyy');
+  };
+
   return (
     <div className="container mx-auto px-4 py-8">
       <h1 className="text-4xl font-bold mb-8 text-gray-800">Goals</h1>
       
-      <div className="mb-6 flex items-center space-x-2 bg-white p-4 rounded-lg shadow">
-        <input
-          ref={inputRef}
-          type="text"
-          placeholder="New goal - create with enter"
-          value={newGoalTitle}
-          onChange={(e) => setNewGoalTitle(e.target.value)}
-          onKeyPress={handleCreateGoal}
-          className="flex-grow p-2 border rounded text-lg"
-        />
-        <input
-          ref={budgetInputRef}
-          type="number"
-          placeholder="Budget"
-          value={newGoalBudget}
-          onChange={(e) => setNewGoalBudget(Number(e.target.value))}
-          onKeyPress={handleCreateGoal}
-          className="p-2 border rounded w-20 text-lg"
-        />
-        <div className="relative">
+      <div className="mb-6 bg-white p-4 rounded-lg shadow">
+        <div className="flex items-center space-x-2 mb-2">
+          <input
+            ref={inputRef}
+            type="text"
+            placeholder="New goal - create with enter"
+            value={newGoalTitle}
+            onChange={(e) => setNewGoalTitle(e.target.value)}
+            onKeyPress={handleCreateGoal}
+            className="flex-grow p-2 border rounded text-lg"
+          />
+          <input
+            ref={budgetInputRef}
+            type="number"
+            placeholder="Budget"
+            value={newGoalBudget}
+            onChange={(e) => setNewGoalBudget(Number(e.target.value))}
+            onKeyPress={handleCreateGoal}
+            className="p-2 border rounded w-20 text-lg"
+          />
+          <div className="relative">
+            <button
+              onClick={() => setIsDatePickerOpen(!isDatePickerOpen)}
+              className="p-3 bg-gray-500 text-white rounded hover:bg-gray-800 text-lg"
+            >
+              <FaCalendarAlt className="text-xl" />
+            </button>
+            {isDatePickerOpen && (
+              <div ref={datePickerRef} className="absolute z-10 right-0 mt-1">
+                <DatePicker
+                  value={newGoalDeadline}
+                  onChange={(date) => {
+                    setNewGoalDeadline(date);
+                    setIsDatePickerOpen(false);
+                  }}
+                  onClose={() => setIsDatePickerOpen(false)}
+                />
+              </div>
+            )}
+          </div>
+          <div className="relative">
+            <button
+              onClick={() => setIsVerifierSelectOpen(!isVerifierSelectOpen)}
+              className="p-3 bg-pink-400 text-white rounded hover:bg-pink-800 text-lg"
+            >
+              <FaUserCheck className="text-xl" />
+            </button>
+            {isVerifierSelectOpen && (
+              <div ref={verifierSelectRef} className="absolute z-10 right-0 mt-1 bg-white border rounded shadow-lg p-4">
+                <ul className="max-h-40 overflow-y-auto">
+                  {friends?.map((friend) => (
+                    <li
+                      key={friend.friendId}
+                      onClick={() => {
+                        setNewGoalVerifier(friend.friendId);
+                        setIsVerifierSelectOpen(false);
+                      }}
+                      className="cursor-pointer hover:bg-gray-100 p-2 text-lg"
+                    >
+                      {friend.friendName}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </div>
           <button
-            onClick={() => setIsDatePickerOpen(!isDatePickerOpen)}
-            className="p-3 bg-gray-500 text-white rounded hover:bg-gray-800 text-lg"
+            onClick={handleCreateGoal}
+            className="p-2 bg-blue-500 text-white rounded hover:bg-blue-600 text-lg"
           >
-            <FaCalendarAlt className="text-xl" />
+            Create Goal
           </button>
-          {isDatePickerOpen && (
-            <div className="absolute z-10 mt-2 left-0">
-              <DatePicker
-                value={newGoalDeadline}
-                onChange={(date) => {
-                  setNewGoalDeadline(date);
-                  setIsDatePickerOpen(false);
-                }}
-                onClose={() => setIsDatePickerOpen(false)}
-              />
+        </div>
+        
+        <div className="flex items-center space-x-4">
+          {newGoalDeadline && (
+            <div className="flex items-center bg-gray-100 p-2 rounded">
+              <span className="text-sm text-gray-600 mr-2">Deadline: {formatDate(newGoalDeadline)}</span>
+              <button onClick={() => setNewGoalDeadline("")} className="text-red-500 hover:text-red-700">
+                <FaTimes />
+              </button>
+            </div>
+          )}
+          {newGoalVerifier && (
+            <div className="flex items-center bg-gray-100 p-2 rounded">
+              <span className="text-sm text-gray-600 mr-2">
+                Verifier: {friends?.find(f => f.friendId === newGoalVerifier)?.friendName}
+              </span>
+              <button onClick={() => setNewGoalVerifier("")} className="text-red-500 hover:text-red-700">
+                <FaTimes />
+              </button>
             </div>
           )}
         </div>
-        <div className="relative">
-          <button
-            onClick={() => setIsVerifierSelectOpen(!isVerifierSelectOpen)}
-            className="p-3 bg-pink-400 text-white rounded hover:bg-pink-800 text-lg"
-          >
-            <FaUserCheck className="text-xl" />
-          </button>
-          {isVerifierSelectOpen && (
-            <div className="absolute z-10 mt-2 left-0 bg-white border rounded shadow-lg p-4">
-              <ul className="max-h-40 overflow-y-auto">
-                {friends?.map((friend) => (
-                  <li
-                    key={friend.friendId}
-                    onClick={() => {
-                      setNewGoalVerifier(friend.friendId);
-                      setIsVerifierSelectOpen(false);
-                    }}
-                    className="cursor-pointer hover:bg-gray-100 p-2 text-lg"
-                  >
-                    {friend.friendName}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
-        </div>
-        <button
-          onClick={handleCreateGoal}
-          className="p-2 bg-blue-500 text-white rounded hover:bg-blue-600 text-lg"
-        >
-          Create Goal
-        </button>
       </div>
+      
       {insufficientBudget && (
         <p className="text-yellow-600 mb-2">Warning: Insufficient budget. Available: {currentUser?.budget}</p>
-      )}
-      {newGoalDeadline && (
-        <p className="text-sm text-gray-600 mb-2">Deadline set: {new Date(newGoalDeadline).toLocaleDateString()}</p>
-      )}
-      {newGoalVerifier && (
-        <p className="text-sm text-gray-600 mb-2">Verifier set: {friends?.find(f => f.friendId === newGoalVerifier)?.friendName}</p>
       )}
 
       <div className="flex justify-end space-x-2 mb-4">

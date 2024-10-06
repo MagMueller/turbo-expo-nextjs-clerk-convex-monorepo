@@ -88,7 +88,7 @@ const FriendsList: React.FC = () => {
                       </button>
                       <button
                         onClick={() => handleRejectRequest(friend.friendId)}
-                        className="p-2 bg-red-500 text-white rounded hover:bg-red-600"
+                        className="p-2 bg-red-400 text-white rounded hover:bg-red-600"
                       >
                         Reject
                       </button>

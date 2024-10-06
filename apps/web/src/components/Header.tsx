@@ -21,6 +21,7 @@ const Header = () => {
     { name: 'Goals', href: '/goals', id: 'goals' },
     { name: 'Friends', href: '/friends', id: 'friends' },
     { name: 'Verify', href: '/verifier', id: 'verifier' },
+    { name: 'Increase Budget', href: '/increase-budget', id: 'increase-budget' },
   ];
 
   useEffect(() => {

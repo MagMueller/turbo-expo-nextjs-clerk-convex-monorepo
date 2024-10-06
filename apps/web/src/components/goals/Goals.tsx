@@ -150,7 +150,7 @@ const Goals: React.FC = () => {
         <div className="relative">
           <button
             onClick={() => setIsVerifierSelectOpen(!isVerifierSelectOpen)}
-            className="p-3 bg-green-500 text-white rounded hover:bg-green-600 text-lg"
+            className="p-3 bg-pink-500 text-white rounded hover:bg-pink-600 text-lg"
           >
             <FaUserCheck className="text-xl" />
           </button>
@@ -175,7 +175,7 @@ const Goals: React.FC = () => {
         </div>
         <button
           onClick={handleCreateGoal}
-          className="p-2 bg-blue-500 text-white rounded hover:bg-blue-600 text-lg"
+          className="p-2 bg-black text-white rounded hover:bg-gray-800 text-lg"
         >
           Create Goal
         </button>

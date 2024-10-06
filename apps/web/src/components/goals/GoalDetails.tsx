@@ -33,9 +33,7 @@ const GoalDetails = ({ goalId }: GoalDetailsProps) => {
       <p className="text-black text-xl sm:text-[28px] not-italic font-normal leading-[130.3%] tracking-[-0.7px]">
         {!isSummary
           ? currentGoal?.content
-          : currentGoal?.summary
-            ? currentGoal?.summary
-            : "No Summary available"}
+          : "No Summary available"}
       </p>
       <div className="flex justify-center items-center space-x-4">
         <p className="text-[#2D2D2D] text-center text-xl not-italic font-extralight leading-[114.3%] tracking-[-0.5px]">

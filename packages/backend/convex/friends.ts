@@ -133,26 +133,6 @@ export const inviteUser = mutation({
   },
 });
 
-export const createOrUpdateUser = mutation({
-  args: { name: v.string(), email: v.string() },
-  handler: async (ctx, { name, email }) => {
-    const userId = await getUserId(ctx);
-    if (!userId) throw new Error("Not authenticated");
-
-    const existingUser = await ctx.db
-      .query("users")
-      .filter((q) => q.eq(q.field("userId"), userId))
-      .first();
-
-    if (existingUser) {
-      await ctx.db.patch(existingUser._id, { name, email });
-      return existingUser._id;
-    }
-
-    const newUserId = await ctx.db.insert("users", { userId, name, email });
-    return newUserId;
-  },
-});
 
 export const rejectFriendRequest = mutation({
   args: { friendId: v.string() },

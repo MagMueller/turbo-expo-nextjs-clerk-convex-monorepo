@@ -1,13 +1,13 @@
 "use client";
 import { api } from "@packages/backend/convex/_generated/api";
+import { Id } from "@packages/backend/convex/_generated/dataModel";
 import { useMutation, useQuery } from "convex/react";
 import { FaCheck, FaTimes } from 'react-icons/fa';
 
 const VerifierTasks = () => {
   const goalsToVerify = useQuery(api.goals.getGoalsToVerify);
   const verifyGoal = useMutation(api.goals.verifyGoal);
-
-  const handleVerify = async (goalId: string, status: "passed" | "failed") => {
+  const handleVerify = async (goalId: Id<"goals">, status: "passed" | "failed") => {
     await verifyGoal({ goalId, status });
   };
 
@@ -19,7 +19,7 @@ const VerifierTasks = () => {
           <div key={goal._id} className="bg-white p-4 rounded-lg shadow-md flex justify-between items-center">
             <div>
               <h3 className="text-xl font-semibold">{goal.title}</h3>
-              <p>Deadline: {new Date(goal.deadline).toLocaleDateString()}</p>
+              <p>Deadline: {goal.deadline ? new Date(goal.deadline).toLocaleDateString() : 'Not set'}</p>
               <p>Budget: {goal.budget}</p>
             </div>
             <div className="flex space-x-2">

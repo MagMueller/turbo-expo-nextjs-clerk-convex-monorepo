@@ -15,7 +15,7 @@ const DatePicker: React.FC<DatePickerProps> = ({ value, onChange, onClose }) => 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (wrapperRef.current && !wrapperRef.current.contains(event.target as Node)) {
-        onClose();
+        onClose?.();
       }
     }
     document.addEventListener('mousedown', handleClickOutside);

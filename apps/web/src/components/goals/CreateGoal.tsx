@@ -23,16 +23,11 @@ export default function CreateGoal() {
   const openaiKeySet = useQuery(api.openai.openaiKeySet) ?? true;
   const friends = useQuery(api.friends.getFriends);
 
-  const filteredFriends = friends?.filter(friend => 
-    friend.friendName.toLowerCase().includes(verifierSearch.toLowerCase()) ||
-    friend.friendEmail.toLowerCase().includes(verifierSearch.toLowerCase())
-  );
 
   const createUserGoal = async () => {
     await createGoal({
       title,
       content,
-      isSummary: isChecked,
       deadline: newGoalDeadline || undefined,
       verifierId: verifierId || undefined,
       budget,

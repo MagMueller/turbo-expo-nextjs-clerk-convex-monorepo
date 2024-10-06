@@ -82,9 +82,11 @@ const TaskItem: React.FC<TaskItemProps> = ({ task, onUpdate, onDelete }) => {
         <div ref={datePickerRef} className="absolute z-10">
           <DatePicker
             selected={task.deadline ? new Date(task.deadline) : null}
-            onChange={(date: Date) => {
-              onUpdate({ ...task, deadline: date.toISOString() });
-              setIsDatePickerOpen(false);
+            onChange={(date: Date | null) => {
+              if (date) {
+                onUpdate({ ...task, deadline: date.toISOString() });
+                setIsDatePickerOpen(false);
+              }
             }}
             onClickOutside={() => setIsDatePickerOpen(false)}
             inline

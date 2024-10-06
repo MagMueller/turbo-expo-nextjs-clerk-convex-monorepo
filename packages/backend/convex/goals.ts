@@ -108,21 +108,8 @@ export const updateGoal = mutation({
 
     const updateFields: { deadline?: string; budget?: number } = {};
     if (deadline !== undefined) updateFields.deadline = deadline;
-    if (budget !== undefined && budget > (goal.budget || 0)) {
-      updateFields.budget = budget;
-      
-      // Deduct additional budget from user
-      const user = await ctx.db
-        .query("users")
-        .filter((q) => q.eq(q.field("userId"), goal.userId))
-        .first();
-      
-      if (!user || user.budget < (budget - (goal.budget || 0))) {
-        throw new Error("Not enough budget");
-      }
+    if (budget !== undefined) updateFields.budget = budget;
 
-      await ctx.db.patch(user._id, { budget: user.budget - (budget - (goal.budget || 0)) });
-    }
     await ctx.db.patch(id, updateFields);
   },
 });

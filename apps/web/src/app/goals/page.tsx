@@ -3,9 +3,11 @@ import Goals from "@/components/goals/Goals";
 
 export default function Home() {
   return (
-    <main className="bg-[#EDEDED] h-screen">
+    <main className="flex flex-col h-screen bg-[#EDEDED]">
       <Header />
-      <Goals />
+      <div className="flex-grow overflow-auto">
+        <Goals />
+      </div>
     </main>
   );
 }

@@ -18,11 +18,11 @@ export const getCurrentUser = query({
       return null;
     }
 
-    // Ensure budget and score are always returned
+    // Ensure budget and score are always returned as numbers
     return {
       ...user,
-      budget: user.budget ?? 100,
-      score: user.score ?? 0,
+      budget: typeof user.budget === 'number' ? user.budget : 100,
+      score: typeof user.score === 'number' ? user.score : 0,
     };
   },
 });
@@ -108,6 +108,19 @@ export const updateAllUsersWithDefaultValues = mutation({
           score: user.score ?? 0,
         });
       }
+    }
+  },
+});
+
+export const forceSetAllUsersWithDefaultValues = mutation({
+  args: {},
+  handler: async (ctx) => {
+    const users = await ctx.db.query("users").collect();
+    for (const user of users) {
+      await ctx.db.patch(user._id, {
+        budget: typeof user.budget === 'number' ? user.budget : 100,
+        score: typeof user.score === 'number' ? user.score : 0,
+      });
     }
   },
 });

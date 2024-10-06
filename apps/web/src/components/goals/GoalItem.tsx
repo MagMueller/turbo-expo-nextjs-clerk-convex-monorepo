@@ -1,5 +1,6 @@
 "use client";
 import { api } from "@packages/backend/convex/_generated/api";
+import { Id } from "@packages/backend/convex/_generated/dataModel";
 import { useQuery } from "convex/react";
 import { differenceInCalendarDays, format } from 'date-fns';
 import React from 'react';
@@ -7,7 +8,7 @@ import { FaCalendarAlt, FaCheck, FaTimes, FaUserCheck, FaWallet } from 'react-ic
 
 export interface GoalProps {
   goal: {
-    _id: string;
+    _id: Id<"goals">;
     title: string;
     _creationTime: number;
     deadline?: string;

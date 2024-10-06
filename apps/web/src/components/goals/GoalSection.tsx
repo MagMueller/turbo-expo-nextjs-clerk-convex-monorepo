@@ -1,3 +1,4 @@
+import { Id } from "@packages/backend/convex/_generated/dataModel";
 import React, { useState } from 'react';
 import { FaChevronDown, FaChevronUp } from 'react-icons/fa';
 import GoalItem, { GoalProps } from './GoalItem';
@@ -5,8 +6,8 @@ import GoalItem, { GoalProps } from './GoalItem';
 interface GoalSectionProps {
   title: string;
   goals: GoalProps['goal'][];
-  onComplete?: (id: string) => void;
-  onNotAchieved?: (id: string) => void;
+  onComplete?: (id: Id<"goals">) => void;
+  onNotAchieved?: (id: Id<"goals">) => void;
 }
 
 const GoalSection: React.FC<GoalSectionProps> = ({ title, goals, onComplete, onNotAchieved }) => {
@@ -27,8 +28,8 @@ const GoalSection: React.FC<GoalSectionProps> = ({ title, goals, onComplete, onN
             <GoalItem
               key={goal._id}
               goal={goal}
-              onComplete={onComplete ? () => onComplete(goal._id) : undefined}
-              onNotAchieved={onNotAchieved ? () => onNotAchieved(goal._id) : undefined}
+              onComplete={onComplete ? () => onComplete(goal._id as Id<"goals">) : undefined}
+              onNotAchieved={onNotAchieved ? () => onNotAchieved(goal._id as Id<"goals">) : undefined}
             />
           ))}
         </div>

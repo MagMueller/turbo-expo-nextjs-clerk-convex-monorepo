@@ -17,7 +17,6 @@ import type {
 } from "convex/server";
 import type * as friends from "../friends.js";
 import type * as goals from "../goals.js";
-import type * as openai from "../openai.js";
 import type * as users from "../users.js";
 import type * as utils from "../utils.js";
 
@@ -32,7 +31,6 @@ import type * as utils from "../utils.js";
 declare const fullApi: ApiFromModules<{
   friends: typeof friends;
   goals: typeof goals;
-  openai: typeof openai;
   users: typeof users;
   utils: typeof utils;
 }>;

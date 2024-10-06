@@ -31,6 +31,7 @@ const GoalItem = ({ goal, deleteGoal, updateGoal, updateVerifier, completeGoal }
   const [budgetValue, setBudgetValue] = useState(goal.budget || 0);
 
   const friends = useQuery(api.friends.getFriends);
+  
   const verifier = goal.verifierId ? useQuery(api.users.getUser, { userId: goal.verifierId }) : null;
   
   const filteredFriends = friends?.filter(friend => 

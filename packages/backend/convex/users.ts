@@ -39,13 +39,15 @@ export const createOrUpdateUser = mutation({
       .first();
 
     if (existingUser) {
-      const updatedUser = await ctx.db.patch(existingUser._id, {
-        name,
-        email,
-        budget: existingUser.budget ?? 100,
-        score: existingUser.score ?? 0,
-      });
-      return updatedUser._id;
+      const updateFields: { name: string; email: string; budget?: number; score?: number } = { name, email };
+      if (!('budget' in existingUser)) {
+        updateFields.budget = 100;
+      }
+      if (!('score' in existingUser)) {
+        updateFields.score = 0;
+      }
+      await ctx.db.patch(existingUser._id, updateFields);
+      return existingUser._id;
     }
 
     const newUserId = await ctx.db.insert("users", {
@@ -59,20 +61,39 @@ export const createOrUpdateUser = mutation({
   },
 });
 
+// Query function for reading user data
 export const getUser = query({
-    args: { userId: v.string() },
-    handler: async (ctx, { userId }) => {
-      const user = await ctx.db
-        .query("users")
-        .filter((q) => q.eq(q.field("userId"), userId))
-        .first();
-      
-      if (user && user.budget === undefined) {
-        const updatedUser = await ctx.db.patch(user._id, { budget: 100, score: 0 });
+  args: { userId: v.string() },
+  handler: async (ctx, { userId }) => {
+    const user = await ctx.db
+      .query("users")
+      .filter((q) => q.eq(q.field("userId"), userId))
+      .first();
+    
+    return user;
+  },
+});
+
+// Mutation function for updating user with default values
+export const ensureUserDefaults = mutation({
+  args: { userId: v.string() },
+  handler: async (ctx, { userId }) => {
+    const user = await ctx.db
+      .query("users")
+      .filter((q) => q.eq(q.field("userId"), userId))
+      .first();
+    
+    if (user) {
+      if (user.budget === undefined || user.score === undefined) {
+        const updatedUser = await ctx.db.patch(user._id, {
+          budget: user.budget ?? 100,
+          score: user.score ?? 0,
+        });
         return updatedUser;
       }
-      
       return user;
+    }
+    return null;
   },
 });
 

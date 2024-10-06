@@ -6,8 +6,8 @@ export default defineSchema({
     userId: v.string(),
     name: v.string(),
     email: v.string(),
-    budget: v.number(),
-    score: v.number(),
+    budget: v.optional(v.number()),
+    score: v.optional(v.number()),
   }).index("by_userId", ["userId"]),
 
   goals: defineTable({

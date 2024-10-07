@@ -20,6 +20,7 @@ export default function CreateGoal() {
   const cancelButtonRef = useRef(null);
 
   const createGoal = useMutation(api.goals.createGoal);
+  const openaiKeySet = useQuery(api.openai.openaiKeySet) ?? true;
   const friends = useQuery(api.friends.getFriends);
 
 

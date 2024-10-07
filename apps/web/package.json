@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "vercel-build": "cd ../../packages/backend && npx convex deploy && cd ../../apps/web && npm run build"
   },
   "dependencies": {
     "@clerk/clerk-react": "^5.0.4",

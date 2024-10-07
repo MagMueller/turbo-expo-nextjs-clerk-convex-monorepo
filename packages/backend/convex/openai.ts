@@ -68,8 +68,8 @@ export const saveSummary = internalMutation({
     summary: v.string(),
   },
   handler: async (ctx, { id, summary }) => {
-    await ctx.db.patch(id, {
-      summary: summary,
-    });
+    // do nothing pass
+    return;
+    
   },
 });
